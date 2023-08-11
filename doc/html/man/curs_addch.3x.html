@@ -1,7 +1,7 @@
 <!--
   * t
   ****************************************************************************
-  * Copyright 2018-2020,2021 Thomas E. Dickey                                *
+  * Copyright 2018-2022,2023 Thomas E. Dickey                                *
   * Copyright 1998-2015,2017 Free Software Foundation, Inc.                  *
   *                                                                          *
   * Permission is hereby granted, free of charge, to any person obtaining a  *
@@ -28,21 +28,21 @@
   * sale, use or other dealings in this Software without prior written       *
   * authorization.                                                           *
   ****************************************************************************
-  * @Id: curs_addch.3x,v 1.56 2021/06/17 21:30:22 tom Exp @
+  * @Id: curs_addch.3x,v 1.61 2023/03/11 20:39:26 tom Exp @
 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN">
 <HTML>
 <HEAD>
 <meta http-equiv="Content-Type" content="text/html; charset=us-ascii">
 <meta name="generator" content="Manpage converted by man2html - see https://invisible-island.net/scripts/readme.html#others_scripts">
-<TITLE>curs_addch 3x</TITLE>
+<TITLE>curs_addch 3x 2023-03-11 ncurses 6.4 Library calls</TITLE>
 <link rel="author" href="mailto:bug-ncurses@gnu.org">
-<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+
 </HEAD>
 <BODY>
-<H1 class="no-header">curs_addch 3x</H1>
+<H1 class="no-header">curs_addch 3x 2023-03-11 ncurses 6.4 Library calls</H1>
 <PRE>
-<STRONG><A HREF="curs_addch.3x.html">curs_addch(3x)</A></STRONG>                                                  <STRONG><A HREF="curs_addch.3x.html">curs_addch(3x)</A></STRONG>
+<STRONG><A HREF="curs_addch.3x.html">curs_addch(3x)</A></STRONG>                   Library calls                  <STRONG><A HREF="curs_addch.3x.html">curs_addch(3x)</A></STRONG>
 
 
 
@@ -74,12 +74,12 @@
 
        <STRONG>o</STRONG>   The cursor automatically wraps to the beginning of the next line.
 
-       <STRONG>o</STRONG>   At  the  bottom of the current scrolling region, and if <STRONG>scrollok</STRONG> is
-           enabled, the scrolling region is scrolled up one line.
+       <STRONG>o</STRONG>   At  the bottom of the current scrolling region, and if <STRONG><A HREF="scrollok.3x.html">scrollok(3x)</A></STRONG>
+           is enabled, the scrolling region is scrolled up one line.
 
-       <STRONG>o</STRONG>   If <STRONG>scrollok</STRONG> is not enabled, writing a character at the lower  right
-           margin  succeeds.   However, an error is returned because it is not
-           possible to wrap to a new line
+       <STRONG>o</STRONG>   If <STRONG><A HREF="scrollok.3x.html">scrollok(3x)</A></STRONG> is not enabled, writing a character  at  the  lower
+           right margin succeeds.  However, an error is returned because it is
+           not possible to wrap to a new line
 
        If <EM>ch</EM> is a tab, newline, carriage return or backspace,  the  cursor  is
        moved appropriately within the window:
@@ -97,9 +97,19 @@
            may be altered by setting the <STRONG>TABSIZE</STRONG> variable.
 
        If  <EM>ch</EM>  is  any  other nonprintable character, it is drawn in printable
-       form, i.e., the <STRONG>^</STRONG><EM>X</EM> notation used by <STRONG><A HREF="unctrl.3x.html">unctrl(3x)</A></STRONG>.   Calling  <STRONG>winch</STRONG>  after
-       adding  a  nonprintable character does not return the character itself,
-       but instead returns the printable representation of the character.
+       form, using the same convention as <STRONG><A HREF="unctrl.3x.html">unctrl(3x)</A></STRONG>:
+
+       <STRONG>o</STRONG>   Control characters are displayed in the <STRONG>^</STRONG><EM>X</EM> notation.
+
+       <STRONG>o</STRONG>   Values above 128 are either meta characters (if the screen has  not
+           been  initialized,  or  if  <STRONG><A HREF="curs_inopts.3x.html">meta(3x)</A></STRONG>  has been called with a <STRONG>TRUE</STRONG> E
+           parameter),  shown  in  the  <STRONG>M-</STRONG><EM>X</EM>  notation,  or  are  displayed  as
+           themselves.   In  the latter case, the values may not be printable;
+           this follows the X/Open specification.
+
+       Calling <STRONG>winch</STRONG> after adding a nonprintable character does not return the
+       character  itself,  but instead returns the printable representation of
+       the character.
 
        Video attributes can be combined with a character  argument  passed  to
        <STRONG>addch</STRONG>  or  related  functions by logical-ORing them into the character.
@@ -178,9 +188,9 @@
        If it is not  possible  to  add  a  complete  character,  an  error  is
        returned:
 
-       <STRONG>o</STRONG>   If  <STRONG>scrollok</STRONG> is not enabled, writing a character at the lower right
-           margin succeeds.  However, an error is returned because it  is  not
-           possible to wrap to a new line
+       <STRONG>o</STRONG>   If  <STRONG><A HREF="scrollok.3x.html">scrollok(3x)</A></STRONG>  is  not enabled, writing a character at the lower
+           right margin succeeds.  However, an error is returned because it is
+           not possible to wrap to a new line
 
        <STRONG>o</STRONG>   If  an error is detected when converting a multibyte character to a
            sequence of bytes, or if it is not  possible  to  add  all  of  the
@@ -198,9 +208,9 @@
 
 
 </PRE><H3><a name="h3-ACS-Symbols">ACS Symbols</a></H3><PRE>
-       X/Open Curses states that the <EM>ACS</EM><STRONG>_</STRONG> definitions are <STRONG>char</STRONG> constants.  For
+       X/Open Curses states that the <STRONG>ACS_</STRONG> definitions are <STRONG>char</STRONG> constants.  For
        the  wide-character  implementation  (see  <STRONG>curs_add_wch</STRONG>),   there   are
-       analogous   <EM>WACS</EM><STRONG>_</STRONG>   definitions  which  are  <STRONG>cchar_t</STRONG>  constants.   Some
+       analogous   <STRONG>WACS_</STRONG>   definitions  which  are  <STRONG>cchar_t</STRONG>  constants.   Some
        implementations are problematic:
 
        <STRONG>o</STRONG>   Some implementations define the ACS symbols to a constant (such  as
@@ -210,8 +220,8 @@
            NetBSD also uses an array, actually named <STRONG>_acs_char</STRONG>, with a <STRONG>#define</STRONG>
            for compatibility.
 
-       <STRONG>o</STRONG>   HPUX curses equates some of the <EM>ACS</EM><STRONG>_</STRONG> symbols to the analogous <EM>WACS</EM><STRONG>_</STRONG>
-           symbols  as  if  the  <EM>ACS</EM><STRONG>_</STRONG>  symbols  were  wide  characters.    The
+       <STRONG>o</STRONG>   HPUX curses equates some of the <STRONG>ACS_</STRONG> symbols to the analogous <STRONG>WACS_</STRONG>
+           symbols  as  if  the  <STRONG>ACS_</STRONG>  symbols  were  wide  characters.    The
            misdefined  symbols  are the arrows and other symbols which are not
            used for line-drawing.
 
@@ -221,7 +231,7 @@
            implementations use <STRONG>i</STRONG> (lowercase).
 
            None  of the terminal descriptions on Unix platforms use uppercase-
-           I,  except  for  Solaris  (i.e.,  <EM>screen</EM>'s  terminal   description,
+           I,  except  for  Solaris  (i.e.,  <STRONG>screen</STRONG>'s  terminal   description,
            apparently  based on the X/Open documentation around 1995).  On the
            other hand, the terminal description <EM>gs6300</EM> (AT&amp;T PC6300 with EMOTS
            Terminal Emulator) uses lowercase-i.
@@ -233,7 +243,7 @@
        second-hand  list  of  their  character descriptions has come to light.
        The ACS-prefixed names for them were invented for <STRONG><A HREF="ncurses.3x.html">ncurses(3x)</A></STRONG>.
 
-       The <EM>displayed</EM> values for the <EM>ACS</EM><STRONG>_</STRONG> and <EM>WACS</EM><STRONG>_</STRONG> constants depend on
+       The <EM>displayed</EM> values for the <STRONG>ACS_</STRONG> and <STRONG>WACS_</STRONG> constants depend on
 
        <STRONG>o</STRONG>   the library configuration, i.e., <STRONG>ncurses</STRONG> versus <STRONG>ncursesw</STRONG>, where the
            latter  is  capable  of displaying Unicode while the former is not,
@@ -298,7 +308,7 @@
 
 
 
-                                                                <STRONG><A HREF="curs_addch.3x.html">curs_addch(3x)</A></STRONG>
+ncurses 6.4                       2023-03-11                    <STRONG><A HREF="curs_addch.3x.html">curs_addch(3x)</A></STRONG>
 </PRE>
 <div class="nav">
 <ul>

@@ -1,6 +1,6 @@
 <!--
   ****************************************************************************
-  * Copyright 2018-2020,2021 Thomas E. Dickey                                *
+  * Copyright 2018-2022,2023 Thomas E. Dickey                                *
   * Copyright 1998-2016,2017 Free Software Foundation, Inc.                  *
   *                                                                          *
   * Permission is hereby granted, free of charge, to any person obtaining a  *
@@ -27,21 +27,21 @@
   * sale, use or other dealings in this Software without prior written       *
   * authorization.                                                           *
   ****************************************************************************
-  * @Id: tset.1,v 1.58 2021/09/18 21:21:55 tom Exp @
+  * @Id: tset.1,v 1.64 2023/06/10 15:46:24 tom Exp @
 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN">
 <HTML>
 <HEAD>
 <meta http-equiv="Content-Type" content="text/html; charset=us-ascii">
 <meta name="generator" content="Manpage converted by man2html - see https://invisible-island.net/scripts/readme.html#others_scripts">
-<TITLE>tset 1</TITLE>
+<TITLE>tset 1 2023-06-10 ncurses 6.4 User commands</TITLE>
 <link rel="author" href="mailto:bug-ncurses@gnu.org">
-<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+
 </HEAD>
 <BODY>
-<H1 class="no-header">tset 1</H1>
+<H1 class="no-header">tset 1 2023-06-10 ncurses 6.4 User commands</H1>
 <PRE>
-<STRONG><A HREF="tset.1.html">tset(1)</A></STRONG>                     General Commands Manual                    <STRONG><A HREF="tset.1.html">tset(1)</A></STRONG>
+<STRONG><A HREF="tset.1.html">tset(1)</A></STRONG>                          User commands                         <STRONG><A HREF="tset.1.html">tset(1)</A></STRONG>
 
 
 
@@ -83,40 +83,41 @@
 
        3. (BSD systems only.) The terminal type associated with  the  standard
        error  output  device  in the <EM>/etc/ttys</EM> file.  (On System-V-like UNIXes
-       and systems using that convention, <EM>getty</EM> does this job by setting  <STRONG>TERM</STRONG>
-       according to the type passed to it by <EM>/etc/inittab</EM>.)
+       and systems using that convention, <STRONG>getty(1)</STRONG> does this  job  by  setting
+       <STRONG>TERM</STRONG> according to the type passed to it by <EM>/etc/inittab</EM>.)
 
-       4. The default terminal type, "unknown".
+       4.  The  default  terminal  type, "unknown", is not suitable for curses
+       applications.
 
-       If  the  terminal  type  was  not specified on the command-line, the <STRONG>-m</STRONG>
+       If the terminal type was not specified  on  the  command-line,  the  <STRONG>-m</STRONG>
        option mappings are then applied (see the section <STRONG>TERMINAL</STRONG> <STRONG>TYPE</STRONG> <STRONG>MAPPING</STRONG>
-       for  more  information).   Then,  if  the  terminal  type begins with a
-       question mark ("?"), the user  is  prompted  for  confirmation  of  the
-       terminal  type.   An empty response confirms the type, or, another type
-       can be entered to specify a new type.  Once the terminal type has  been
+       for more information).  Then,  if  the  terminal  type  begins  with  a
+       question  mark  ("?"),  the  user  is  prompted for confirmation of the
+       terminal type.  An empty response confirms the type, or,  another  type
+       can  be entered to specify a new type.  Once the terminal type has been
        determined, the terminal description for the terminal is retrieved.  If
        no terminal description is found for the type, the user is prompted for
        another terminal type.
 
        Once the terminal description is retrieved,
 
-       <STRONG>o</STRONG>   if  the  "<STRONG>-w</STRONG>"  option  is  enabled,  <STRONG>tset</STRONG> may update the terminal's
+       <STRONG>o</STRONG>   if the "<STRONG>-w</STRONG>" option is  enabled,  <STRONG>tset</STRONG>  may  update  the  terminal's
            window size.
 
-           If the window size cannot be obtained from  the  operating  system,
-           but  the  terminal  description  (or  environment,  e.g., <STRONG>LINES</STRONG> and
-           <STRONG>COLUMNS</STRONG> variables specify this), use  this  to  set  the  operating
+           If  the  window  size cannot be obtained from the operating system,
+           but the terminal  description  (or  environment,  e.g.,  <STRONG>LINES</STRONG>  and
+           <STRONG>COLUMNS</STRONG>  variables  specify  this),  use  this to set the operating
            system's notion of the window size.
 
-       <STRONG>o</STRONG>   if  the  "<STRONG>-c</STRONG>"  option is enabled, the backspace, interrupt and line
+       <STRONG>o</STRONG>   if the "<STRONG>-c</STRONG>" option is enabled, the backspace,  interrupt  and  line
            kill characters (among many other things) are set
 
-       <STRONG>o</STRONG>   unless  the  "<STRONG>-I</STRONG>"  option  is  enabled,  the   terminal   and   tab
-           <EM>initialization</EM>  strings  are sent to the standard error output, and
+       <STRONG>o</STRONG>   unless   the   "<STRONG>-I</STRONG>"   option  is  enabled,  the  terminal  and  tab
+           <EM>initialization</EM> strings are sent to the standard error  output,  and
            <STRONG>tset</STRONG> waits one second (in case a hardware reset was issued).
 
-       <STRONG>o</STRONG>   Finally, if the erase, interrupt  and  line  kill  characters  have
-           changed,  or  are not set to their default values, their values are
+       <STRONG>o</STRONG>   Finally,  if  the  erase,  interrupt  and line kill characters have
+           changed, or are not set to their default values, their  values  are
            displayed to the standard error output.
 
 
@@ -132,10 +133,10 @@
        <STRONG>o</STRONG>   resets any unset special characters to their default values
 
        before doing the terminal initialization described above.  Also, rather
-       than  using  the  terminal <EM>initialization</EM> strings, it uses the terminal
+       than using the terminal <EM>initialization</EM> strings, it  uses  the  terminal
        <EM>reset</EM> strings.
 
-       The <STRONG>reset</STRONG> command is useful after a program dies leaving a terminal  in
+       The  <STRONG>reset</STRONG> command is useful after a program dies leaving a terminal in
        an abnormal state:
 
        <STRONG>o</STRONG>   you may have to type
@@ -143,7 +144,7 @@
                <EM>&lt;LF&gt;</EM><STRONG>reset</STRONG><EM>&lt;LF&gt;</EM>
 
            (the line-feed character is normally control-J) to get the terminal
-           to work, as carriage-return may no  longer  work  in  the  abnormal
+           to  work,  as  carriage-return  may  no longer work in the abnormal
            state.
 
        <STRONG>o</STRONG>   Also, the terminal will often not echo the command.
@@ -157,7 +158,7 @@
        <STRONG>-e</STRONG> <EM>ch</EM>
             Set the erase character to <EM>ch</EM>.
 
-       <STRONG>-I</STRONG>   Do  not  send  the  terminal  or tab initialization strings to the
+       <STRONG>-I</STRONG>   Do not send the terminal or  tab  initialization  strings  to  the
             terminal.
 
        <STRONG>-i</STRONG> <EM>ch</EM>
@@ -170,12 +171,12 @@
             Specify a mapping from a port type to a terminal.  See the section
             <STRONG>TERMINAL</STRONG> <STRONG>TYPE</STRONG> <STRONG>MAPPING</STRONG> for more information.
 
-       <STRONG>-Q</STRONG>   Do  not  display any values for the erase, interrupt and line kill
-            characters.   Normally  <STRONG>tset</STRONG>  displays  the  values  for   control
+       <STRONG>-Q</STRONG>   Do not display any values for the erase, interrupt and  line  kill
+            characters.    Normally  <STRONG>tset</STRONG>  displays  the  values  for  control
             characters which differ from the system's default values.
 
-       <STRONG>-q</STRONG>   The  terminal  type  is  displayed to the standard output, and the
-            terminal is not initialized in any way.  The option "-" by  itself
+       <STRONG>-q</STRONG>   The terminal type is displayed to the  standard  output,  and  the
+            terminal  is not initialized in any way.  The option "-" by itself
             is equivalent but archaic.
 
        <STRONG>-r</STRONG>   Print the terminal type to the standard error output.
@@ -187,28 +188,29 @@
        <STRONG>-V</STRONG>   reports the version of ncurses which was used in this program, and
             exits.
 
-       <STRONG>-w</STRONG>   Resize the window to match the  size  deduced  via  <STRONG><A HREF="curs_terminfo.3x.html">setupterm(3x)</A></STRONG>.
-            Normally  this  has  no  effect,  unless  <STRONG>setupterm</STRONG> is not able to
+       <STRONG>-w</STRONG>   Resize  the  window  to  match the size deduced via <STRONG><A HREF="curs_terminfo.3x.html">setupterm(3x)</A></STRONG>.
+            Normally this has no effect,  unless  <STRONG>setupterm</STRONG>  is  not  able  to
             detect the window size.
 
-       The arguments for the <STRONG>-e</STRONG>, <STRONG>-i</STRONG>, and <STRONG>-k</STRONG> options may either be  entered  as
-       actual  characters  or by using the "hat" notation, i.e., control-h may
+       The  arguments  for the <STRONG>-e</STRONG>, <STRONG>-i</STRONG>, and <STRONG>-k</STRONG> options may either be entered as
+       actual characters or by using the "hat" notation, i.e.,  control-h  may
        be specified as "^H" or "^h".
 
        If neither <STRONG>-c</STRONG> or <STRONG>-w</STRONG> is given, both options are assumed.
 
 
 </PRE><H2><a name="h2-SETTING-THE-ENVIRONMENT">SETTING THE ENVIRONMENT</a></H2><PRE>
-       It is often desirable to enter the terminal type and information  about
+       It  is often desirable to enter the terminal type and information about
        the terminal's capabilities into the shell's environment.  This is done
        using the <STRONG>-s</STRONG> option.
 
-       When the <STRONG>-s</STRONG> option is specified, the commands to enter the  information
-       into  the  shell's  environment are written to the standard output.  If
-       the <STRONG>SHELL</STRONG> environmental variable ends in "csh", the  commands  are  for
-       <STRONG>csh</STRONG>,  otherwise, they are for <STRONG>sh</STRONG>.  Note, the <STRONG>csh</STRONG> commands set and unset
-       the shell variable <STRONG>noglob</STRONG>, leaving it unset.  The following line in the
-       <STRONG>.login</STRONG> or <STRONG>.profile</STRONG> files will initialize the environment correctly:
+       When  the <STRONG>-s</STRONG> option is specified, the commands to enter the information
+       into the shell's environment are written to the  standard  output.   If
+       the  <STRONG>SHELL</STRONG>  environmental  variable ends in "csh", the commands are for
+       <STRONG>csh</STRONG>, otherwise, they are for <STRONG>sh(1)</STRONG>.  Note, the  <STRONG>csh</STRONG>  commands  set  and
+       unset  the shell variable <STRONG>noglob</STRONG>, leaving it unset.  The following line
+       in the  <STRONG>.login</STRONG>  or  <STRONG>.profile</STRONG>  files  will  initialize  the  environment
+       correctly:
 
            eval `tset -s options ... `
 
@@ -357,28 +359,29 @@
        the  <STRONG>LINES</STRONG>  and <STRONG>COLUMNS</STRONG> environment variables may be useful for working
        around window-size problems.  Those  have  the  drawback  that  if  the
        window  is  resized, those variables must be recomputed and reassigned.
-       To do this more easily, use the <STRONG><A HREF="resize.1.html">resize(1)</A></STRONG> program.
+       To do this more easily, use the <STRONG>resize(1)</STRONG> program.
 
 
 </PRE><H2><a name="h2-ENVIRONMENT">ENVIRONMENT</a></H2><PRE>
        The <STRONG>tset</STRONG> command uses these environment variables:
 
        SHELL
-            tells <STRONG>tset</STRONG> whether to initialize <STRONG>TERM</STRONG> using <STRONG>sh</STRONG> or <STRONG>csh</STRONG> syntax.
+            tells <STRONG>tset</STRONG> whether  to  initialize  <STRONG>TERM</STRONG>  using  <STRONG>sh(1)</STRONG>  or  <STRONG>csh(1)</STRONG>
+            syntax.
 
-       TERM Denotes your terminal  type.   Each  terminal  type  is  distinct,
+       TERM Denotes  your  terminal  type.   Each  terminal  type is distinct,
             though many are similar.
 
        TERMCAP
-            may  denote  the  location of a termcap database.  If it is not an
-            absolute pathname, e.g., begins  with  a  "/",  <STRONG>tset</STRONG>  removes  the
-            variable  from  the  environment  before  looking for the terminal
+            may denote the location of a termcap database.  If it  is  not  an
+            absolute  pathname,  e.g.,  begins  with  a  "/", <STRONG>tset</STRONG> removes the
+            variable from the environment  before  looking  for  the  terminal
             description.
 
 
 </PRE><H2><a name="h2-FILES">FILES</a></H2><PRE>
        /etc/ttys
-            system port name to terminal type mapping database  (BSD  versions
+            system  port  name to terminal type mapping database (BSD versions
             only).
 
        /usr/share/terminfo
@@ -386,14 +389,14 @@
 
 
 </PRE><H2><a name="h2-SEE-ALSO">SEE ALSO</a></H2><PRE>
-       <STRONG>csh(1)</STRONG>,   <STRONG>sh(1)</STRONG>,   <STRONG>stty(1)</STRONG>,   <STRONG><A HREF="curs_terminfo.3x.html">curs_terminfo(3x)</A></STRONG>,  <STRONG>tty(4)</STRONG>,  <STRONG><A HREF="terminfo.5.html">terminfo(5)</A></STRONG>,
+       <STRONG>csh(1)</STRONG>,  <STRONG>sh(1)</STRONG>,  <STRONG>stty(1)</STRONG>,   <STRONG><A HREF="curs_terminfo.3x.html">curs_terminfo(3x)</A></STRONG>,   <STRONG>tty(4)</STRONG>,   <STRONG><A HREF="terminfo.5.html">terminfo(5)</A></STRONG>,
        <STRONG>ttys(5)</STRONG>, <STRONG>environ(7)</STRONG>
 
-       This describes <STRONG>ncurses</STRONG> version 6.3 (patch 20211021).
+       This describes <STRONG>ncurses</STRONG> version 6.4 (patch 20230617).
 
 
 
-                                                                       <STRONG><A HREF="tset.1.html">tset(1)</A></STRONG>
+ncurses 6.4                       2023-06-10                           <STRONG><A HREF="tset.1.html">tset(1)</A></STRONG>
 </PRE>
 <div class="nav">
 <ul>

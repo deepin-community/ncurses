@@ -1,3 +1,190 @@
+ncurses (6.4+20230625-2) unstable; urgency=medium
+
+  * Save some build time by not building the static libraries along the
+    shared ones, they are configured and built separately.
+  * Get rid of debian/rxvt.ti (Closes: #1037071) and record relevant
+    Debian changes in a new patch 02-debian-rxvt.diff.
+    - Set kbs=^? according to the Debian keyboard policy.
+    - Provide rxvt-m as an alias to rxvt-basic.
+  * Pass "-Xusr/lib" to dh_missing in the binary-indep target to work
+    around spurious failures in full builds (see #1039941).
+  * Drop patch debian-alacritty.diff.  Alacritty users should upgrade vim
+    to version 2:9.0.1658-1 or higher, or start vim with $TERM set to
+    xterm-256color.
+  * Take over the foot and foot-direct terminfo entries from the
+    foot-terminfo package in ncurses-term (see #1041685).
+    - Add a versioned Provides on foot-terminfo to ncurses-term in order
+      to help with partial upgrades.
+
+ -- Sven Joachim <svenjoac@gmx.de>  Sun, 23 Jul 2023 16:58:09 +0200
+
+ncurses (6.4+20230625-1) unstable; urgency=low
+
+  * New upstream patchlevel.
+  * Add Breaks against tmux (<< 3.3a-4) to libtinfo6 (see #1038269).
+  * Remove Replaces/Conflicts/Provides relationships with pre-buster
+    packages in lib{32,64}ncurses-dev.
+  * Set maintainer to ncurses@packages.debian.org, add Craig to Uploaders.
+  * Stop stripping libncurses++w.a manually.
+  * Move the cons25-debian terminfo entry from ncurses-base to
+    ncurses-term, it had only been used in Debian GNU/kFreeBSD 6.0.
+  * Tighten the dependency of ncurses-term on ncurses-base, so that they
+    are always from the same version.
+  * New patch debian-alacritty.diff: remove xterm+focus from the alacritty
+    terminfo entry, as it triggers misbehavior in Vim version before
+    9.0.1619 (see #1038401).
+  * Stop building the libtinfo5, libncurses5 and libncursew5 packages
+    (Closes: #1025964).
+  * Upload to unstable.
+
+ -- Sven Joachim <svenjoac@gmx.de>  Sat, 01 Jul 2023 10:15:14 +0200
+
+ncurses (6.4+20230603-1) experimental; urgency=low
+
+  * New upstream patchlevel.
+    - Improve checks for malformed terminfo data (report/analysis by
+      Jonathan Bar Or, Michael Pearse, Emanuele Cozzi (CVE-2023-29491,
+      Closes: #1034372)).
+    - Drop compatibility with obsolete versions of tack, e.g., pre-1.08
+      (Closes: #1034549).
+  * Drop cherry-picked patches, applied upstream.
+  * Configure with "--disable-setuid-environ" instead of
+    "--disable-root-environ" and drop patch debian-env-access.diff.
+  * Refresh remaining Debian patches.
+    - Drop the hunk for screen-base from 02-debian-backspace.diff.
+      Upstream sets kbs in screen-base to xterm+kbs now, so this is
+      handled via the "--with-xterm-kbs" configure option.
+  * Configure with "--disable-root-access" to further restrict programs
+    running with elevated privileges.
+  * Update symbols files for the new symbols tiparm_s and tiscan_s,
+    and the newly exported symbols _nc_safe_fopen and _nc_safe_open3.
+  * Remove the ncurses{w,}5-config compatibility symlinks
+    (Closes: #1029977).
+  * Remove old upstream SHA1 signing key C52048C0C0748FEE from
+    debian/upstream/signing-key.asc.
+  * Export ARFLAGS = -crv in debian/rules to ensure deterministic static
+    libraries (see #1029404).
+  * Stop building the empty transitional packages libtinfo-dev
+    and libncurses{,w}5-dev (Closes: #1032708, #1032740, #1032741).
+  * Move the ncurses-base terminfo files to /usr/share/terminfo
+    (Closes: #1028202, #622286).
+    - Add a Breaks on cryptsetup-initramfs (<< 2:2.6.1) to ncurses-base
+      (see #1028234).
+  * Remove various Breaks/Replaces relationships with package versions
+    predating buster.
+  * Update years in debian/copyright.
+
+ -- Sven Joachim <svenjoac@gmx.de>  Thu, 15 Jun 2023 18:34:20 +0200
+
+ncurses (6.4-4) unstable; urgency=medium
+
+  * Run autoconf-dickey in the toplevel and test/ directories rather
+    than autoreconf-dickey, as the latter picks up the backup file of
+    configure.in below the .pc/ directory, which is unwanted and does
+    not work (Closes: #1035621).
+
+ -- Sven Joachim <svenjoac@gmx.de>  Sun, 07 May 2023 16:33:47 +0200
+
+ncurses (6.4-3) unstable; urgency=medium
+
+  * Configure with "--disable-root-environ" to disallow loading of
+    custom terminfo entries in setuid/setgid programs, mitigating the
+    impact of CVE-2023-29491 (see #1034372).
+    - Update the symbols files for the newly exported symbol
+      _nc_env_access.
+    - New patch fix-configure-root-args-option.diff cherry-picked from
+      the 20230415 patchlevel, fixing a copy/paste error which caused
+      the "--disable-root-environ" configure option to pick up code
+      meant to be used by the "--disable-root-args" option instead.
+    - New patch debian-env-access.diff, changing the behavior of the
+      "--disable-root-environ" configure option to not restrict programs
+      run by the superuser, equivalent to the "--disable-setuid-environ"
+      option introduced in the 20230423 patchlevel.
+
+ -- Sven Joachim <svenjoac@gmx.de>  Sat, 06 May 2023 17:16:54 +0200
+
+ncurses (6.4-2) unstable; urgency=medium
+
+  * Add Breaks against vim-common (<< 2:9.0.1000-2) to ncurses-base
+    and ncurses-term (Closes: #1027435).
+  * New patch fix_crash_on_very_long_tc-use_clause.diff, cherry-picked
+    from the 20230121 patchlevel: correct limit-check when dumping tc/use
+    clause via tic -I (report by Gabriel Ravier, Closes: #1029399).
+  * Work around dh_strip bug #875780 by stripping libncurses++w.a manually
+    (Closes: #1029404).
+
+ -- Sven Joachim <svenjoac@gmx.de>  Wed, 25 Jan 2023 21:21:49 +0100
+
+ncurses (6.4-1) unstable; urgency=medium
+
+  * New upstream release.
+    - Correct PS vs PE names in bracketed+paste (report by Bram
+      Moolenaar, Addresses: #1027435).
+  * Update symbols files and bump shlibs.
+
+ -- Sven Joachim <svenjoac@gmx.de>  Mon, 02 Jan 2023 08:49:50 +0100
+
+ncurses (6.3+20221224-2) unstable; urgency=medium
+
+  * Upload to unstable.
+
+ -- Sven Joachim <svenjoac@gmx.de>  Tue, 27 Dec 2022 21:00:02 +0100
+
+ncurses (6.3+20221224-1) experimental; urgency=medium
+
+  * New upstream patchlevel.
+    - Revise kon/kon2/jfbterm to undo "linux2.6" change to
+      smacs/rmacs/enacs (Closes: #1012800).
+    - Improve pointer/limit checks associated with deleting a screen
+      (Closes: #1015756).
+  * Refresh Debian patches.
+  * Convert lintian overrides to the new format in Lintian 2.115.
+  * Add a new override for source-is-missing in the Ada documentation
+    (see #1019980).
+  * Upgrade Standards-Version to 4.6.2, no changes needed.
+
+ -- Sven Joachim <svenjoac@gmx.de>  Mon, 26 Dec 2022 20:22:07 +0100
+
+ncurses (6.3+20220423-2) unstable; urgency=medium
+
+  * Update patch 02-debian-xterm.diff: drop "dec+sl" from xterm-new and
+    derived terminfo descriptions (Closes: #1010270).
+
+ -- Sven Joachim <svenjoac@gmx.de>  Thu, 05 May 2022 19:01:43 +0200
+
+ncurses (6.3+20220423-1) unstable; urgency=medium
+
+  * New upstream patchlevel.
+    - Add a limit-check to guard against corrupt terminfo data
+      (report/testcase by NCNIPC of China (CVE-2022-29458),
+      Closes: #1009870).
+    - Minor clarification to clear.1 (Closes: #999437).
+  * Refresh Debian patches.
+  * Update symbols files.
+  * Ensure that the README file in ncurses-examples has correct
+    permissions (Closes: #1003929).
+  * Add a lintian override to ncurses-examples for a false positive
+    bash-term-in-posix-shell in tput-initc.
+  * Update debian/ncurses-term.links to avoid a broken symlink
+    /usr/share/terminfo/r/rxvt-color.
+  * Remove libmd-dev build dependency on kfreebsd, no longer needed.
+
+ -- Sven Joachim <svenjoac@gmx.de>  Tue, 26 Apr 2022 19:52:23 +0200
+
+ncurses (6.3-2) unstable; urgency=medium
+
+  * Add Breaks on neovim (<< 0.6.0) to ncurses-base (Closes: #999777).
+  * Drop patch 02-debian-drop-rin-from-screen-256color.diff
+    (Closes: #1003546).  Tmux users should upgrade to version 3.0 or
+    higher, or set TERM to something else than screen-256color.
+  * Make ncurses-base the primary package into which the Debian FAQ
+    and TODO files are installed.
+  * Add libmd-dev to Build-Depends on kfreebsd-any to work around FTBFS
+    if /usr/lib/$(DEB_HOST_MULTIARCH)/pkgconfig does not exist.
+  * Install the example programs into /usr/libexec/ncurses-examples.
+
+ -- Sven Joachim <svenjoac@gmx.de>  Mon, 17 Jan 2022 18:02:04 +0100
+
 ncurses (6.3-1) unstable; urgency=medium
 
   * New upstream release.

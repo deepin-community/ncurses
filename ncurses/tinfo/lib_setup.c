@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright 2018-2020,2021 Thomas E. Dickey                                *
+ * Copyright 2018-2022,2023 Thomas E. Dickey                                *
  * Copyright 1998-2016,2017 Free Software Foundation, Inc.                  *
  *                                                                          *
  * Permission is hereby granted, free of charge, to any person obtaining a  *
@@ -49,7 +49,7 @@
 #include <locale.h>
 #endif
 
-MODULE_ID("$Id: lib_setup.c,v 1.214 2021/09/01 23:38:12 tom Exp $")
+MODULE_ID("$Id: lib_setup.c,v 1.219 2023/06/24 13:25:14 tom Exp $")
 
 /****************************************************************************
  *
@@ -679,10 +679,9 @@ TINFO_SETUP_TERM(TERMINAL **tp,
 #endif
     }
     myname = strdup(tname);
-
-    if (strlen(myname) > MAX_NAME_SIZE) {
+    if (myname == NULL || strlen(myname) > MAX_NAME_SIZE) {
 	ret_error(TGETENT_ERR,
-		  "TERM environment must be <= %d characters.\n",
+		  "TERM environment must be 1..%d characters.\n",
 		  MAX_NAME_SIZE,
 		  free(myname));
     }
@@ -743,6 +742,7 @@ TINFO_SETUP_TERM(TERMINAL **tp,
 		       "Not enough memory to create terminal structure.\n",
 		       myname, free(myname));
 	}
+	++_nc_globals.terminal_count;
 #if HAVE_SYSCONF
 	{
 	    long limit;
@@ -830,7 +830,7 @@ TINFO_SETUP_TERM(TERMINAL **tp,
 	if (NC_ISATTY(Filedes)) {
 	    NCURSES_SP_NAME(def_shell_mode) (NCURSES_SP_ARG);
 	    NCURSES_SP_NAME(def_prog_mode) (NCURSES_SP_ARG);
-	    baudrate();
+	    NCURSES_SP_NAME(baudrate) (NCURSES_SP_ARG);
 	}
 	code = OK;
 #endif
@@ -907,6 +907,7 @@ _nc_forget_prescr(void)
 {
     PRESCREEN_LIST *p, *q;
     pthread_t id = GetThreadID();
+    _nc_lock_global(screen);
     for (p = _nc_prescreen.allocated, q = 0; p != 0; q = p, p = p->next) {
 	if (p->id == id) {
 	    if (q) {
@@ -918,6 +919,7 @@ _nc_forget_prescr(void)
 	    break;
 	}
     }
+    _nc_unlock_global(screen);
 }
 #endif /* USE_PTHREADS */
 
@@ -989,6 +991,7 @@ _nc_setupterm(const char *tname,
     int rc = ERR;
     TERMINAL *termp = 0;
 
+    _nc_init_pthreads();
     _nc_lock_global(prescreen);
     START_TRACE();
     if (TINFO_SETUP_TERM(&termp, tname, Filedes, errret, reuse) == OK) {
@@ -998,6 +1001,7 @@ _nc_setupterm(const char *tname,
 	}
     }
     _nc_unlock_global(prescreen);
+
     return rc;
 }
 #endif

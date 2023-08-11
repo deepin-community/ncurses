@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright 2018-2020,2021 Thomas E. Dickey                                *
+ * Copyright 2018-2022,2023 Thomas E. Dickey                                *
  * Copyright 1998-2016,2017 Free Software Foundation, Inc.                  *
  *                                                                          *
  * Permission is hereby granted, free of charge, to any person obtaining a  *
@@ -47,11 +47,14 @@
 #include <transform.h>
 #include <tty_settings.h>
 
-MODULE_ID("$Id: tput.c,v 1.97 2021/10/02 18:09:23 tom Exp $")
+MODULE_ID("$Id: tput.c,v 1.102 2023/04/08 16:26:36 tom Exp $")
 
 #define PUTS(s)		fputs(s, stdout)
 
 const char *_nc_progname = "tput";
+
+static bool opt_v = FALSE;	/* quiet, do not show warnings */
+static bool opt_x = FALSE;	/* clear scrollback if possible */
 
 static bool is_init = FALSE;
 static bool is_reset = FALSE;
@@ -81,6 +84,7 @@ usage(const char *optstring)
 	KEEP("  -S <<       read commands from standard input")
 	KEEP("  -T TERM     use this instead of $TERM")
 	KEEP("  -V          print curses-version")
+	KEEP("  -v          verbose, show warnings")
 	KEEP("  -x          do not try to clear scrollback")
 	KEEP("")
 	KEEP("Commands:")
@@ -148,7 +152,7 @@ exit_code(int token, int value)
  * Returns nonzero on error.
  */
 static int
-tput_cmd(int fd, TTY * settings, bool opt_x, int argc, char **argv, int *used)
+tput_cmd(int fd, TTY * settings, int argc, char **argv, int *used)
 {
     NCURSES_CONST char *name;
     char *s;
@@ -160,7 +164,7 @@ tput_cmd(int fd, TTY * settings, bool opt_x, int argc, char **argv, int *used)
     name = check_aliases(argv[0], FALSE);
     *used = 1;
     if (is_reset || is_init) {
-	TTY oldmode;
+	TTY oldmode = *settings;
 
 	int terasechar = -1;	/* new erase character */
 	int intrchar = -1;	/* new interrupt character */
@@ -180,6 +184,7 @@ tput_cmd(int fd, TTY * settings, bool opt_x, int argc, char **argv, int *used)
 #endif
 	set_control_chars(settings, terasechar, intrchar, tkillchar);
 	set_conversions(settings);
+
 	if (send_init_strings(fd, &oldmode)) {
 	    reset_flush();
 	}
@@ -230,7 +235,9 @@ tput_cmd(int fd, TTY * settings, bool opt_x, int argc, char **argv, int *used)
     } else if (VALID_STRING(s)) {
 	if (argc > 1) {
 	    int k;
+	    int narg;
 	    int analyzed;
+	    int provided;
 	    int popcount;
 	    long numbers[1 + NUM_PARM];
 	    char *strings[1 + NUM_PARM];
@@ -270,14 +277,45 @@ tput_cmd(int fd, TTY * settings, bool opt_x, int argc, char **argv, int *used)
 
 	    popcount = 0;
 	    _nc_reset_tparm(NULL);
+	    /*
+	     * Count the number of numeric parameters which are provided.
+	     */
+	    provided = 0;
+	    for (narg = 1; narg < argc; ++narg) {
+		char *ending = NULL;
+		long check = strtol(argv[narg], &ending, 10);
+		if (check < 0 || ending == argv[narg] || *ending != '\0')
+		    break;
+		provided = narg;
+	    }
 	    switch (paramType) {
+	    case Str:
+		s = TPARM_1(s, strings[1]);
+		analyzed = 1;
+		if (provided == 0 && argc >= 1)
+		    provided++;
+		break;
+	    case Str_Str:
+		s = TPARM_2(s, strings[1], strings[2]);
+		analyzed = 2;
+		if (provided == 0 && argc >= 1)
+		    provided++;
+		if (provided == 1 && argc >= 2)
+		    provided++;
+		break;
 	    case Num_Str:
 		s = TPARM_2(s, numbers[1], strings[2]);
 		analyzed = 2;
+		if (provided == 1 && argc >= 2)
+		    provided++;
 		break;
 	    case Num_Str_Str:
 		s = TPARM_3(s, numbers[1], strings[2], strings[3]);
 		analyzed = 3;
+		if (provided == 1 && argc >= 2)
+		    provided++;
+		if (provided == 2 && argc >= 3)
+		    provided++;
 		break;
 	    case Numbers:
 		analyzed = _nc_tparm_analyze(NULL, s, p_is_s, &popcount);
@@ -315,7 +353,13 @@ tput_cmd(int fd, TTY * settings, bool opt_x, int argc, char **argv, int *used)
 	    if (analyzed < popcount) {
 		analyzed = popcount;
 	    }
-	    *used += analyzed;
+	    if (opt_v && (analyzed != provided)) {
+		fprintf(stderr, "%s: %s parameters for \"%s\"\n",
+			_nc_progname,
+			(analyzed < provided ? "extra" : "missing"),
+			argv[0]);
+	    }
+	    *used += provided;
 	}
 
 	/* use putp() in order to perform padding */
@@ -336,8 +380,8 @@ main(int argc, char **argv)
     int result = 0;
     int fd;
     int used;
+    TTY old_settings;
     TTY tty_settings;
-    bool opt_x = FALSE;		/* clear scrollback if possible */
     bool is_alias;
     bool need_tty;
 
@@ -346,7 +390,7 @@ main(int argc, char **argv)
 
     term = getenv("TERM");
 
-    while ((c = getopt(argc, argv, is_alias ? "T:Vx" : "ST:Vx")) != -1) {
+    while ((c = getopt(argc, argv, is_alias ? "T:Vvx" : "ST:Vvx")) != -1) {
 	switch (c) {
 	case 'S':
 	    cmdline = FALSE;
@@ -359,6 +403,9 @@ main(int argc, char **argv)
 	case 'V':
 	    puts(curses_version());
 	    ExitProgram(EXIT_SUCCESS);
+	case 'v':		/* verbose */
+	    opt_v = TRUE;
+	    break;
 	case 'x':		/* do not try to clear scrollback */
 	    opt_x = TRUE;
 	    break;
@@ -391,6 +438,7 @@ main(int argc, char **argv)
 	quit(ErrUsage, "No value for $TERM and no -T specified");
 
     fd = save_tty_settings(&tty_settings, need_tty);
+    old_settings = tty_settings;
 
     if (setupterm(term, fd, &errret) != OK && errret <= 0)
 	quit(ErrTermType, "unknown terminal \"%s\"", term);
@@ -400,7 +448,8 @@ main(int argc, char **argv)
 	if ((argc <= 0) && !is_alias)
 	    usage(NULL);
 	while (argc > 0) {
-	    code = tput_cmd(fd, &tty_settings, opt_x, argc, argv, &used);
+	    tty_settings = old_settings;
+	    code = tput_cmd(fd, &tty_settings, argc, argv, &used);
 	    if (code != 0)
 		break;
 	    argc -= used;
@@ -433,7 +482,9 @@ main(int argc, char **argv)
 
 	argnow = argvec;
 	while (argnum > 0) {
-	    int code = tput_cmd(fd, &tty_settings, opt_x, argnum, argnow, &used);
+	    int code;
+	    tty_settings = old_settings;
+	    code = tput_cmd(fd, &tty_settings, argnum, argnow, &used);
 	    if (code != 0) {
 		if (result == 0)
 		    result = ErrSystem(0);	/* will return value >4 */

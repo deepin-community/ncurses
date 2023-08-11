@@ -6,7 +6,7 @@
  *  wrs(5/28/93) -- modified to be consistent (perform identically) with either
  *                  PDCurses or under Unix System V, R4
  *
- * $Id: testcurs.c,v 1.56 2021/03/27 22:39:50 tom Exp $
+ * $Id: testcurs.c,v 1.58 2023/05/28 14:23:34 tom Exp $
  */
 
 #include <test.priv.h>
@@ -252,11 +252,11 @@ inputTest(WINDOW *win)
 #ifdef KEY_MOUSE
 	if (c == KEY_MOUSE) {
 #if defined(NCURSES_MOUSE_VERSION)
-#define ButtonChanged(n) ((event.bstate) & NCURSES_MOUSE_MASK(1, 037))
-#define ButtonPressed(n) ((event.bstate) & NCURSES_MOUSE_MASK(1, NCURSES_BUTTON_PRESSED))
-#define ButtonDouble(n)  ((event.bstate) & NCURSES_MOUSE_MASK(1, NCURSES_DOUBLE_CLICKED))
-#define ButtonTriple(n)  ((event.bstate) & NCURSES_MOUSE_MASK(1, NCURSES_TRIPLE_CLICKED))
-#define ButtonRelease(n) ((event.bstate) & NCURSES_MOUSE_MASK(1, NCURSES_BUTTON_RELEASED))
+#define ButtonChanged(n) ((event.bstate) & NCURSES_MOUSE_MASK(n, (NCURSES_BUTTON_RELEASED|NCURSES_BUTTON_PRESSED|NCURSES_BUTTON_CLICKED|NCURSES_DOUBLE_CLICKED|NCURSES_TRIPLE_CLICKED|NCURSES_RESERVED_EVENT)))
+#define ButtonPressed(n) ((event.bstate) & NCURSES_MOUSE_MASK(n, NCURSES_BUTTON_PRESSED))
+#define ButtonDouble(n)  ((event.bstate) & NCURSES_MOUSE_MASK(n, NCURSES_DOUBLE_CLICKED))
+#define ButtonTriple(n)  ((event.bstate) & NCURSES_MOUSE_MASK(n, NCURSES_TRIPLE_CLICKED))
+#define ButtonRelease(n) ((event.bstate) & NCURSES_MOUSE_MASK(n, NCURSES_BUTTON_RELEASED))
 	    MEVENT event;
 	    int button = 0;
 
@@ -676,16 +676,48 @@ display_menu(int old_option, int new_option)
     refresh();
 }
 
+static void
+usage(int ok)
+{
+    static const char *msg[] =
+    {
+	"Usage: testcurs [options]"
+	,""
+	,USAGE_COMMON
+    };
+    size_t n;
+
+    for (n = 0; n < SIZEOF(msg); n++)
+	fprintf(stderr, "%s\n", msg[n]);
+
+    ExitProgram(ok ? EXIT_SUCCESS : EXIT_FAILURE);
+}
+/* *INDENT-OFF* */
+VERSION_COMMON()
+/* *INDENT-ON* */
+
 int
-main(
-	int argc GCC_UNUSED,
-	char *argv[]GCC_UNUSED)
+main(int argc, char *argv[])
 {
     WINDOW *win;
     int old_option = (-1);
     int new_option = 0;
     bool quit = FALSE;
     int n;
+    int ch;
+
+    while ((ch = getopt(argc, argv, OPTS_COMMON)) != -1) {
+	switch (ch) {
+	case OPTS_VERSION:
+	    show_version(argv);
+	    ExitProgram(EXIT_SUCCESS);
+	default:
+	    usage(ch == OPTS_USAGE);
+	    /* NOTREACHED */
+	}
+    }
+    if (optind < argc)
+	usage(FALSE);
 
     setlocale(LC_ALL, "");
 
