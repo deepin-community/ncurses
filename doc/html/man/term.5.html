@@ -27,21 +27,21 @@
   * sale, use or other dealings in this Software without prior written       *
   * authorization.                                                           *
   ****************************************************************************
-  * @Id: term.5,v 1.40 2021/08/15 19:38:47 tom Exp @
+  * @Id: term.5,v 1.45 2023/06/17 17:52:54 tom Exp @
 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN">
 <HTML>
 <HEAD>
 <meta http-equiv="Content-Type" content="text/html; charset=us-ascii">
 <meta name="generator" content="Manpage converted by man2html - see https://invisible-island.net/scripts/readme.html#others_scripts">
-<TITLE>term 5</TITLE>
+<TITLE>term 5 2023-06-17 ncurses 6.4 File formats</TITLE>
 <link rel="author" href="mailto:bug-ncurses@gnu.org">
-<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+
 </HEAD>
 <BODY>
-<H1 class="no-header">term 5</H1>
+<H1 class="no-header">term 5 2023-06-17 ncurses 6.4 File formats</H1>
 <PRE>
-<STRONG><A HREF="term.5.html">term(5)</A></STRONG>                       File Formats Manual                      <STRONG><A HREF="term.5.html">term(5)</A></STRONG>
+<STRONG><A HREF="term.5.html">term(5)</A></STRONG>                          File formats                          <STRONG><A HREF="term.5.html">term(5)</A></STRONG>
 
 
 
@@ -283,11 +283,11 @@
 </PRE><H3><a name="h3-Magic-codes">Magic codes</a></H3><PRE>
        The  magic  number  in a binary terminfo file is the first 16-bits (two
        bytes).  Besides making it more reliable for the library to check  that
-       a  file  is terminfo, utilities such as <STRONG>file</STRONG> also use that to tell what
-       the file-format is.  System V defined more than one magic number,  with
-       0433, 0435 as screen-dumps (see <STRONG><A HREF="scr_dump.5.html">scr_dump(5)</A></STRONG>).  This implementation uses
-       01036 as a continuation of that sequence, but with  a  different  high-
-       order byte to avoid confusion.
+       a  file  is  terminfo,  utilities such as <STRONG>file(1)</STRONG> also use that to tell
+       what the file-format is.  System V defined more than one magic  number,
+       with 0433, 0435 as screen-dumps (see <STRONG><A HREF="scr_dump.5.html">scr_dump(5)</A></STRONG>).  This implementation
+       uses 01036 as a continuation of that sequence,  but  with  a  different
+       high-order byte to avoid confusion.
 
 
 </PRE><H3><a name="h3-The-TERMTYPE-structure">The TERMTYPE structure</a></H3><PRE>
@@ -376,11 +376,11 @@
        extended number support for ncurses 6.1
 
        Eric S. Raymond
-       documented legacy terminfo format, e.g., from pcurses.
+       documented legacy terminfo format, e.g., from <EM>pcurses</EM>.
 
 
 
-                                                                       <STRONG><A HREF="term.5.html">term(5)</A></STRONG>
+ncurses 6.4                       2023-06-17                           <STRONG><A HREF="term.5.html">term(5)</A></STRONG>
 </PRE>
 <div class="nav">
 <ul>

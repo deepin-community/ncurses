@@ -1,0 +1,11 @@
+autoreconf.after
+autoreconf.before
+files
+libtermcap.so
+*.substvars
+*.debhelper
+*.debhelper.log
+lib*ncurses*/
+lib*tinfo*/
+ncurses-*/
+tmp/

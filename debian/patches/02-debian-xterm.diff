@@ -8,7 +8,7 @@ Description: Debian changes to xterm* terminfo entries
  some ancient Debian systems used xterm-debian as $TERM.
 Bug-Debian: https://bugs.debian.org/933053
 Forwarded: not-needed
-Last-Update: 2021-09-06
+Last-Update: 2023-06-05
 
 ---
  misc/terminfo.src |    4 ++--
@@ -16,16 +16,16 @@ Last-Update: 2021-09-06
 
 --- a/misc/terminfo.src
 +++ b/misc/terminfo.src
-@@ -4811,7 +4811,7 @@ xterm+nofkeys|building block for xterm f
- xterm-new|modern xterm terminal emulator,
- 	npc,
- 	kcbt=\E[Z, kent=\EOM, nel=\EE, use=ecma+index,
--	use=ansi+rep, use=ecma+strikeout, use=xterm+pcfkeys,
-+	use=ecma+strikeout, use=xterm+pcfkeys,
- 	use=xterm+nofkeys,
- 
- # This fragment is for people who cannot agree on what the backspace key
-@@ -5422,7 +5422,7 @@ xterm-24|vs100|xterms|xterm terminal emu
+@@ -5005,7 +5005,7 @@ xterm-p370|xterm patch #370,
+ 	kcbt=\E[Z, kent=\EOM, nel=\EE,
+ 	rv=\E\\[41;[1-6][0-9][0-9];0c,
+ 	xr=\EP>\\|XTerm\\([1-9][0-9]+\\)\E\\\\,
+-	use=ecma+index, use=ansi+rep, use=ecma+strikeout,
++	use=ecma+index, use=ecma+strikeout,
+ 	use=xterm+pcfkeys, use=xterm+nofkeys,
+ 	use=bracketed+paste, use=report+version,
+ 	use=xterm+focus,
+@@ -5681,7 +5681,7 @@ xterm-24|vs100|xterms|xterm terminal emu
  	lines#24, use=xterm-old,
  
  # This is xterm for ncurses.

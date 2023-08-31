@@ -1,5 +1,5 @@
 -------------------------------------------------------------------------------
--- Copyright 2018-2020,2021 Thomas E. Dickey                                 --
+-- Copyright 2018-2022,2023 Thomas E. Dickey                                 --
 -- Copyright 1998-2017,2018 Free Software Foundation, Inc.                   --
 --                                                                           --
 -- Permission is hereby granted, free of charge, to any person obtaining a   --
@@ -26,7 +26,7 @@
 -- sale, use or other dealings in this Software without prior written        --
 -- authorization.                                                            --
 -------------------------------------------------------------------------------
--- $Id: INSTALL,v 1.235 2021/10/19 23:34:17 tom Exp $
+-- $Id: INSTALL,v 1.246 2023/06/17 17:18:20 tom Exp $
 ---------------------------------------------------------------------
              How to install Ncurses/Terminfo on your system
 ---------------------------------------------------------------------
@@ -444,7 +444,7 @@ CONFIGURE OPTIONS:
 		--with-menu-libname=XXX
 		--with-panel-libname=XXX
 
-	Rather than renaming them abitrarily, a prefix or suffix is
+	Rather than renaming them arbitrarily, a prefix or suffix is
 	recommended.  An "n" prefix provides consistency with ncurses versus
 	curses, i.e.,
 
@@ -477,13 +477,17 @@ CONFIGURE OPTIONS:
 
     --disable-root-access
 	Compile with environment restriction, so most file-access is limited
-	when running via a setuid/setgid application.
+	when running as root, or via a setuid/setgid application.
 
     --disable-root-environ
 	Compile with environment restriction, so certain environment variables
-	are not available when running as root, or via a setuid/setgid
-	application.  These are (for example $TERMINFO) those that allow the
-	search path for the terminfo or termcap entry to be customized.
+	are not available when running as root.  These are (for example
+	$TERMINFO) those that allow the search path for the terminfo or termcap
+	entry to be customized.
+
+	Disabling the root environment variables also disables the setuid
+	environment variables by default.  Use the --disable-setuid-environ
+	option to modify this behavior.
 
     --disable-rpath-hack
 	Normally the configure script helps link libraries found in unusual
@@ -497,6 +501,16 @@ CONFIGURE OPTIONS:
 
     --disable-stripping
 	Do not strip installed executables.
+
+    --disable-setuid-environ
+	Compile with environment restriction, so certain environment variables
+	are not available when running via a setuid/setgid application.  These
+	are (for example $TERMINFO) those that allow the search path for the
+	terminfo or termcap entry to be customized.
+
+	A setuid/setgid application inherits its environment variables from
+	the current user, in contrast to sudo which may limit the environment
+	variables that ncurses uses.
 
     --disable-tic-depends
 	When building shared libraries, normally the tic library is linked to
@@ -806,6 +820,11 @@ CONFIGURE OPTIONS:
     --enable-xmc-glitch
 	Compile-in support experimental xmc (magic cookie) code.
 
+    --with-abi-altered=NUM
+	Override the displayed (rather than compiled-in) ABI.  Only packagers
+	who have created configurations where the ABI differs from ncurses
+	should be interested in this option.
+
     --with-abi-version=NUM
 	Override the ABI version, which is used in shared library filenames.
 	Normally this is the same as the release version; some ports have
@@ -1009,7 +1028,7 @@ CONFIGURE OPTIONS:
 	See also the --enable-getcap option.
 
     --with-infocmp-path[=XXX]
-	Use this option to override the automatic detection of tic in your
+	Use this option to override the automatic detection of infocmp in your
 	$PATH when building fallbacks (see "--with-fallbacks").
 
     --with-install-prefix=XXX
@@ -1146,8 +1165,18 @@ CONFIGURE OPTIONS:
 	path.  The configure script allows only a single directory, because
 	that is used as the directory in which to install ".pc" files.
 
-	The automatic check for the library path selects the first directory
-	which currently exists.
+	The automatic check for the library path prefers the first directory
+	which currently exists.  If none of the directories listed by
+	pkg-config exist, the check prefers a pkgconfig directory under the
+	"libdir" set by the configure script (which may not be the system
+	default), or if pkg-config lists nothing suitable, the first one which
+	is listed by pkg-config is used.
+
+	Automatic selection is overridden by providing an option-value
+	beginning with "/".
+
+	If this option is omitted, the default directory for installing
+	".pc" files is ${libdir}/pkgconfig
 
     --with-profile
 	Generate profile-libraries These are named by adding "_p" to the root,
@@ -1206,6 +1235,10 @@ CONFIGURE OPTIONS:
 	Specify whether to use the release or ABI version for shared libraries.
 	This is normally chosen automatically based on the type of system
 	which you are building on.  We use it for testing the configure script.
+
+    --with-strip-program=XXX
+    	When stripping executables during install, use the specified program
+	rather than "strip".
 
     --with-sysmouse
 	use FreeBSD sysmouse interface provide mouse support on the console.
@@ -1371,11 +1404,6 @@ CONFIGURE OPTIONS:
 	programs (e.g., tic).  The test applications will still be built if you
 	type "make", though not if you simply do "make install".
 
-    --without-tack
-	Suppress build/install with tack program, if it happens to be
-	in the same build-tree (tack was moved out of the ncurses source-tree
-	in 20070203).
-
     --without-tests
 	Tell the configure script to suppress the build of ncurses' test
 	programs.
@@ -1400,6 +1428,27 @@ COMPATIBILITY WITH OLDER RELEASES:
     Here are some of the major interface changes, and related problems which
     you may encounter when building a system with different versions of
     ncurses:
+
+    6.4 (Dec 31, 2022)
+	Interface changes:
+
+	+ none
+
+	Added extensions:
+
+	+ none
+
+	Added internal functions (other than "_sp" variants):
+
+	+ add _nc_free_termtype1 and _nc_free_tparm, for memory-leaks
+
+	Removed internal functions:
+
+	+ none
+
+	Modified internal functions:
+
+	+ none
 
     6.3 (Oct 21, 2021)
 	Interface changes:
