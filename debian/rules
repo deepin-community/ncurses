@@ -11,9 +11,11 @@ export CFLAGS := $(shell DEB_BUILD_MAINT_OPTIONS=hardening=+bindnow dpkg-buildfl
 export CPPFLAGS := $(shell DEB_BUILD_MAINT_OPTIONS=hardening=+bindnow dpkg-buildflags --get CPPFLAGS)
 export CXXFLAGS := $(shell DEB_BUILD_MAINT_OPTIONS=hardening=+bindnow dpkg-buildflags --get CXXFLAGS)
 export LDFLAGS := $(shell DEB_BUILD_MAINT_OPTIONS=hardening=+bindnow dpkg-buildflags --get LDFLAGS)
-export BUILD_CFLAGS := $(CFLAGS)
-export BUILD_CPPFLAGS := $(CPPFLAGS)
-export BUILD_LDFLAGS := $(LDFLAGS)
+export BUILD_CFLAGS := $(shell DEB_HOST_ARCH=`dpkg --print-architecture` dpkg-buildflags --get CFLAGS)
+export BUILD_CPPFLAGS := $(shell DEB_HOST_ARCH=`dpkg --print-architecture` dpkg-buildflags --get CPPFLAGS)
+export BUILD_LDFLAGS := $(shell DEB_HOST_ARCH=`dpkg --print-architecture` \
+				DEB_BUILD_MAINT_OPTIONS=hardening=+bindnow dpkg-buildflags --get LDFLAGS)
+export ARFLAGS = -crv
 
 include /usr/share/dpkg/architecture.mk
 
@@ -27,7 +29,7 @@ endif
 
 # These are important since this is a library package
 soname=6
-sodepver = (>= 6.3)
+sodepver = (>= 6.3+20220423)
 
 # Name our packages
 package-base=ncurses-base
@@ -41,16 +43,10 @@ package-ti-64=lib64tinfo$(soname)
 package-libw=libncursesw$(soname)
 package-libw-32=lib32ncursesw$(soname)
 package-libw-64=lib64ncursesw$(soname)
-package-dev=libncurses5-dev
 package-dev-32=lib32ncurses-dev
 package-dev-64=lib64ncurses-dev
-package-devti=libtinfo-dev
-package-devw=libncursesw5-dev
 package-term=ncurses-term
 package-examples=ncurses-examples
-package-lib-legacy=libncurses5
-package-ti-legacy=libtinfo5
-package-libw-legacy=libncursesw5
 
 workdir=$(shell pwd)
 tempdir=debian/tmp
@@ -67,10 +63,6 @@ wobjdir-static=$(srcdir)/obj-wide-static
 wobjdir-32=$(srcdir)/obj-wide-32
 wobjdir-64=$(srcdir)/obj-wide-64
 objdir-test=$(srcdir)/obj-test
-objdir-legacy=$(srcdir)/obj-legacy
-wobjdir-legacy=$(srcdir)/obj-wide-legacy
-
-autogen-files := debian/libtermcap.so
 
 ifeq ($(DEB_HOST_ARCH),i386)
 build_64_target = x86_64-$(DEB_HOST_GNU_SYSTEM)
@@ -93,7 +85,7 @@ build_64 = build-64 build-wide-64
 endif
 
 ifeq ($(DEB_HOST_ARCH),amd64)
-build_32_target = i486-$(DEB_HOST_GNU_SYSTEM)
+build_32_target = i686-$(DEB_HOST_GNU_SYSTEM)
 build_32 = build-32 build-wide-32
 endif
 
@@ -107,20 +99,12 @@ override build_32=
 override build_64=
 endif
 
-ifeq (,$(filter pkg.ncurses.nolegacy,$(DEB_BUILD_PROFILES)))
-build_legacy = build-legacy build-wide-legacy
-endif
-
 ifeq (,$(filter pkg.ncurses.noexamples,$(DEB_BUILD_PROFILES)))
 build_examples = build-test
 endif
 
 ifeq ($(DEB_HOST_ARCH_OS),linux)
 with_mouse = --with-gpm
-else
-ifeq ($(DEB_HOST_ARCH_OS),kfreebsd)
-with_mouse = --without-sysmouse
-endif
 endif
 
 CONFARGS =	--prefix=/usr \
@@ -141,6 +125,8 @@ CONFARGS =	--prefix=/usr \
 		--without-progs \
 		$(with_mouse) \
 		--enable-symlinks \
+		--disable-setuid-environ \
+		--disable-root-access \
 		--disable-termcap \
 		--with-default-terminfo-dir=/etc/terminfo \
 		--with-terminfo-dirs="/etc/terminfo:/lib/terminfo:/usr/share/terminfo" \
@@ -153,18 +139,9 @@ CONFARGS =	--prefix=/usr \
 		--enable-overwrite \
 		--with-xterm-kbs=del
 
-CONFARGS-LEGACY =	$(CONFARGS) \
-			--with-abi-version=5 \
-			--disable-lp64 \
-			--with-chtype='long' \
-			--with-mmask-t='long' \
-			--disable-overwrite \
-			--without-cxx-binding \
-			--without-normal
-
 CONFARGS-TEST =	--prefix=/usr \
 		--build=$(DEB_BUILD_GNU_TYPE) \
-		--bindir=/usr/lib/ncurses/examples \
+		--bindir=/usr/libexec/ncurses-examples \
 		--datadir=/usr/share/ncurses-examples \
 		--disable-stripping \
 		--with-x11-rgb=/etc/X11/rgb.txt \
@@ -173,24 +150,12 @@ CONFARGS-TEST =	--prefix=/usr \
 
 ifneq ($(DEB_BUILD_GNU_TYPE),$(DEB_HOST_GNU_TYPE))
 CONFARGS += --with-build-cc=gcc --host=$(DEB_HOST_GNU_TYPE)
-CONFARGS-LEGACY += --with-build-cc=gcc --host=$(DEB_HOST_GNU_TYPE)
 CONFARGS-TEST += --host=$(DEB_HOST_GNU_TYPE)
 endif
 
-# Files for /lib/terminfo.
-libterminfofiles=a/ansi c/cons25 c/cons25-debian c/cygwin d/dumb h/hurd l/linux \
-	m/mach m/mach-bold m/mach-color m/mach-gnu m/mach-gnu-color p/pcansi \
-	r/rxvt r/rxvt-basic r/rxvt-m r/rxvt-unicode r/rxvt-unicode-256color \
-	s/screen s/screen-256color s/screen-256color-bce s/screen-bce \
-	s/screen-s s/screen-w s/screen.xterm-256color s/sun t/tmux \
-	t/tmux-256color v/vt100 v/vt102 v/vt220 v/vt52 w/wsvt25 w/wsvt25m \
-	x/xterm x/xterm-256color x/xterm-color x/xterm-debian x/xterm-mono \
-	x/xterm-r5 x/xterm-r6 x/xterm-vt220 x/xterm-xfree86 E/Eterm \
-	E/Eterm-color
-
-# Blacklist terminfo entries shipped by other Debian packages so that we do
+# Exclude terminfo entries shipped by other Debian packages so that we do
 # not begin shipping them by accident.
-badterminfo = f/fbterm f/foot f/foot-direct k/kbtin x/xterm-kitty K/KBtin
+badterminfo = f/fbterm k/kbtin x/xterm-kitty K/KBtin
 
 ifneq ($(DEB_BUILD_GNU_TYPE),$(DEB_HOST_GNU_TYPE))
 # Force necessary configure checks which do not work when
@@ -203,20 +168,23 @@ endif
 
 config.guess-stamp:
 	dh_update_autotools_config
-	dh_autoreconf autoreconf-dickey -- -f -i
+	dh_autoreconf debian/autoconf.sh
 	touch $@
 
 $(objdir)/config.status: config.guess-stamp
 	test -d $(objdir) || mkdir $(objdir)
 	cd $(objdir) && $(relsrcdir)/configure \
-		$(CONFARGS)
+		$(CONFARGS) \
+		--without-normal \
+		--disable-widec
 
 $(objdir-static)/config.status: config.guess-stamp
 	test -d $(objdir-static) || mkdir $(objdir-static)
 	cd $(objdir-static) && $(relsrcdir)/configure \
 		$(CONFARGS) \
 		--without-shared \
-		--without-gpm
+		--without-gpm \
+		--disable-widec
 
 $(objdir-32)/config.status: config.guess-stamp
 	test -d $(objdir-32) || mkdir $(objdir-32)
@@ -229,6 +197,7 @@ $(objdir-32)/config.status: config.guess-stamp
 		$(CONFARGS) \
 		--host=$(build_32_target) \
 		--without-gpm \
+		--disable-widec \
 		--libdir=/usr/lib32
 
 $(objdir-64)/config.status: config.guess-stamp
@@ -242,12 +211,14 @@ $(objdir-64)/config.status: config.guess-stamp
 		$(CONFARGS) \
 		--host=$(build_64_target) \
 		--without-gpm \
+		--disable-widec \
 		--libdir=/usr/lib64
 
 $(wobjdir)/config.status: config.guess-stamp
 	test -d $(wobjdir) || mkdir $(wobjdir)
 	cd $(wobjdir) && $(relsrcdir)/configure \
 		$(CONFARGS) \
+		--without-normal \
 		--with-progs \
 		--enable-widec
 
@@ -287,17 +258,6 @@ $(wobjdir-64)/config.status: config.guess-stamp
 		--enable-widec \
 		--libdir=/usr/lib64
 
-$(objdir-legacy)/config.status: config.guess-stamp
-	test -d $(objdir-legacy) || mkdir $(objdir-legacy)
-	cd $(objdir-legacy) && $(relsrcdir)/configure \
-		$(CONFARGS-LEGACY)
-
-$(wobjdir-legacy)/config.status: config.guess-stamp
-	test -d $(wobjdir-legacy) || mkdir $(wobjdir-legacy)
-	cd $(wobjdir-legacy) && $(relsrcdir)/configure \
-		$(CONFARGS-LEGACY) \
-		--enable-widec
-
 $(objdir-test)/config.status: build-wide config.guess-stamp
 	test -d $(objdir-test) || mkdir $(objdir-test)
 	export LD_LIBRARY_PATH=$${LD_LIBRARY_PATH}:$(wobjdir)/lib && \
@@ -309,7 +269,7 @@ build-indep: build-normal build-wide
 	touch $@
 
 build-arch build: build-indep build-static build-wide-static $(build_examples) \
-	          $(build_legacy) $(build_64) $(build_32)
+	          $(build_64) $(build_32)
 	touch build-arch build
 
 build-normal: $(objdir)/config.status
@@ -346,14 +306,6 @@ build-wide-64: $(wobjdir-64)/config.status
 	cd $(wobjdir-64) && $(MAKE) CC="$(HOST_CC) -m64" CXX="$(HOST_CXX) -m64"
 	touch $@
 
-build-legacy: $(objdir-legacy)/config.status
-	cd $(objdir-legacy) && $(MAKE)
-	touch $@
-
-build-wide-legacy: $(wobjdir-legacy)/config.status
-	cd $(wobjdir-legacy) && $(MAKE)
-	touch $@
-
 build-test: $(objdir-test)/config.status
 	cd $(objdir-test) && $(MAKE)
 	touch $@
@@ -362,7 +314,7 @@ clean:
 	dh_testdir
 	rm -f build build-arch build-indep
 	rm -f build-normal build-static build-wide \
-		build-wide-static build-legacy build-wide-legacy build-test $(build_32) $(build_64)
+		build-wide-static build-test $(build_32) $(build_64)
 	rm -rf $(objdir)
 	rm -rf $(objdir-static)
 	rm -rf $(objdir-32)
@@ -371,10 +323,7 @@ clean:
 	rm -rf $(wobjdir-static)
 	rm -rf $(wobjdir-32)
 	rm -rf $(wobjdir-64)
-	rm -rf $(objdir-legacy)
-	rm -rf $(wobjdir-legacy)
 	rm -rf $(objdir-test)
-	rm -f $(autogen-files)
 	dh_autoreconf_clean
 	dh_clean
 
@@ -388,16 +337,17 @@ install-indep: build-indep
 	$(MAKE) -C $(objdir) install.libs
 	rm -f $(tempdir)/usr/lib/$(DEB_HOST_MULTIARCH)/libtinfo.so*
 	rm -f $(tempdir)/usr/lib/$(DEB_HOST_MULTIARCH)/libtic.so*
+	install -m 644 $(objdir)/man/ncurses6-config.1 $(wobjdir)/man
 	$(MAKE) -C $(wobjdir) install
 
 	# Move terminfo files to the right place.
 	mv $(tempdir)/etc/terminfo $(tempdir)/usr/share/terminfo
 
-	# Remove blacklisted terminal types and other stuff we don't install
+	# Remove excluded terminal types and other stuff we don't install
 	cd $(tempdir)/usr/share/terminfo && rm -f $(badterminfo)
 	rm -f $(tempdir)/usr/lib/terminfo \
-	      $(tempdir)/usr/lib/$(DEB_HOST_MULTIARCH)/libcurses.so \
-	      $(tempdir)/usr/lib/$(DEB_HOST_MULTIARCH)/libtinfo.so
+	      $(tempdir)/usr/share/man/man1/init.1 \
+	      $(tempdir)/usr/lib/$(DEB_HOST_MULTIARCH)/libcurses.so
 
 	# Provide header file symlinks under usr/include/ncursesw
 	install -d $(fulltempdir)/usr/include/ncursesw
@@ -410,27 +360,19 @@ install-indep: build-indep
 	# into their packages.  Hurd uses gsbom/grbom, so pass -x to tic.
 ifeq ($(DEB_BUILD_GNU_TYPE),$(DEB_HOST_GNU_TYPE))
 	set -e; \
-	for ti in hurd rxvt rxvt-unicode; do \
-	  LD_LIBRARY_PATH=$${LD_LIBRARY_PATH}:$(fulltempdir)/usr/lib/$(DEB_HOST_MULTIARCH):$(fulltempdir)/lib/$(DEB_HOST_MULTIARCH) \
+	for ti in hurd rxvt-unicode; do \
+	  LD_LIBRARY_PATH=$${LD_LIBRARY_PATH}:$(fulltempdir)/usr/lib/$(DEB_HOST_MULTIARCH) \
 		TERMINFO=$(fulltempdir)/usr/share/terminfo \
 		$(tempdir)/usr/bin/tic -x debian/$$ti.ti; \
 	done
 else
 	set -e; \
-	for ti in hurd rxvt rxvt-unicode; do \
+	for ti in hurd rxvt-unicode; do \
 		TERMINFO=$(fulltempdir)/usr/share/terminfo \
 		tic -x debian/$$ti.ti; \
 	done
 
 endif
-
-	# Move ncurses-base terminfo entries to /lib/terminfo.
-	set -e; \
-	for f in $(libterminfofiles); do \
-		dir=$(tempdir)/lib/terminfo/$$(dirname $$f); \
-		mkdir -p $$dir; \
-		mv $(tempdir)/usr/share/terminfo/$$f $$dir; \
-	done
 
 	# Create an empty /etc/terminfo for the sysadmin.
 	mkdir -p $(tempdir)/etc/terminfo
@@ -440,53 +382,32 @@ install-arch: build-arch install-indep
 	install -m 644 -t $(fulltempdir)/usr/lib/$(DEB_HOST_MULTIARCH) $(objdir-static)/lib/*.a
 	install -m 644 -t $(fulltempdir)/usr/lib/$(DEB_HOST_MULTIARCH) $(wobjdir-static)/lib/*.a
 
-	# Always add -ltinfo when linking with -lncurses or -lnursesw
+	# Always add -ltinfo when linking with -lncurses or -lncursesw
 	rm -f $(tempdir)/usr/lib/$(DEB_HOST_MULTIARCH)/libncurses.so
 	echo "INPUT(libncurses.so.6 -ltinfo)" > $(tempdir)/usr/lib/$(DEB_HOST_MULTIARCH)/libncurses.so
 	rm -f $(tempdir)/usr/lib/$(DEB_HOST_MULTIARCH)/libncursesw.so
 	echo "INPUT(libncursesw.so.6 -ltinfo)" > $(tempdir)/usr/lib/$(DEB_HOST_MULTIARCH)/libncursesw.so
-ifneq (,$(build_32))
-	mkdir -p $(tempdir)/usr/lib32
-	rm -f $(tempdir)/usr/lib32/libncurses.so
-	echo "INPUT(libncurses.so.6 -ltinfo)" > $(tempdir)/usr/lib32/libncurses.so
-	rm -f $(tempdir)/usr/lib32/libncursesw.so
-	echo "INPUT(libncursesw.so.6 -ltinfo)" > $(tempdir)/usr/lib32/libncursesw.so
-endif
-ifneq (,$(build_64))
-	mkdir -p $(tempdir)/usr/lib64
-	rm -f $(tempdir)/usr/lib64/libncurses.so
-	echo "INPUT(libncurses.so.6 -ltinfo)" > $(tempdir)/usr/lib64/libncurses.so
-	rm -f $(tempdir)/usr/lib64/libncursesw.so
-	echo "INPUT(libncursesw.so.6 -ltinfo)" > $(tempdir)/usr/lib64/libncursesw.so
-endif
 
 ifneq ($(build_examples),)
 	# Install the test programs, sparing the detour to debian/tmp.
 	$(MAKE) -C $(objdir-test) DESTDIR=$(workdir)/debian/$(package-examples) install
 	sed -i -e 's%^#!/usr/bin/env perl%#!/usr/bin/perl%' \
-		$(workdir)/debian/$(package-examples)/usr/lib/ncurses/examples/tracemunch
+		$(workdir)/debian/$(package-examples)/usr/libexec/ncurses-examples/tracemunch
 endif
-
-debian/libtermcap.so: debian/libtermcap.so.in
-	cat $< > $@
 
 binary:	binary-arch binary-indep
 
-binary-arch: build-arch install-arch $(autogen-files)
+binary-arch: build-arch install-arch
 	dh_testdir
 	dh_testroot
+	dh_installdirs -a
 	dh_install -p$(package-bin) -Xncurses6-config -Xncursesw6-config
 	dh_install -a -N$(package-bin)
-	dh_installman -a
-	dh_installdocs -p$(package-ti) -p$(package-bin) -p$(package-examples) debian/FAQ
+	dh_installdocs -p$(package-ti) -p$(package-bin) -p$(package-examples)
 	dh_installdocs -a -N$(package-bin) -N$(package-ti) -N$(package-examples) \
-		       -N$(package-ti-legacy) -N$(package-lib-legacy) -N$(package-libw-legacy) \
 		       -N$(package-lib-32) -N$(package-libw-32) -N$(package-dev-32) -N$(package-ti-32) \
 		       -N$(package-lib-64) -N$(package-libw-64) -N$(package-dev-64) -N$(package-ti-64) \
 		       --link-doc=$(package-ti)
-	dh_installdocs -p$(package-ti-legacy)
-	dh_installdocs -p$(package-lib-legacy) -p$(package-libw-legacy) \
-		       --link-doc=$(package-ti-legacy)
 ifneq ($(build_32),)
 	dh_installdocs -p$(package-ti-32)
 	dh_installdocs -p$(package-lib-32) -p$(package-libw-32) -p$(package-dev-32) \
@@ -498,23 +419,23 @@ ifneq ($(build_64),)
 		       --link-doc=$(package-ti-64)
 endif
 	dh_installchangelogs -a NEWS
-	dh_installdirs -a
+	dh_installman -a
 
 	# Strip the packages, shipping detached debugging symbols.
 	dh_dwz -a
 	dh_strip -a
 	dh_lintian -a
 	dh_link -a
-	dh_compress -p$(package-examples) usr/lib/ncurses/examples/README
+	dh_compress -p$(package-examples) usr/libexec/ncurses-examples/README
 	dh_compress -a -N$(package-examples)
 	dh_fixperms -a
+ifneq ($(build_examples),)
+	chmod -x debian/$(package-examples)/usr/libexec/ncurses-examples/README*
+endif
 	dh_missing -a --fail-missing
-	dh_makeshlibs -p$(package-ti) -V "$(package-ti) $(sodepver)" --add-udeb=$(package-ti)-udeb -- -c4
+	dh_makeshlibs -p$(package-ti) -V "$(package-ti) $(sodepver)" -- -c4
 	dh_makeshlibs -p$(package-lib) -V "$(package-lib) $(sodepver)" -- -c4
-	dh_makeshlibs -p$(package-libw) -V "$(package-libw) $(sodepver)" --add-udeb=$(package-libw)-udeb -- -c4
-	dh_makeshlibs -p$(package-ti-legacy) -V "$(package-ti-legacy) $(sodepver)" -- -c4
-	dh_makeshlibs -p$(package-lib-legacy) -V "$(package-lib-legacy) $(sodepver)" -- -c4
-	dh_makeshlibs -p$(package-libw-legacy) -V "$(package-libw-legacy) $(sodepver)" -- -c4
+	dh_makeshlibs -p$(package-libw) -V "$(package-libw) $(sodepver)" -- -c4
 ifneq ($(build_32),)
 	dh_makeshlibs -p$(package-ti-32) -V "$(package-ti-32) $(sodepver)" -- -c4
 	dh_makeshlibs -p$(package-lib-32) -V "$(package-lib-32) $(sodepver)" -- -c4
@@ -526,8 +447,8 @@ ifneq ($(build_64),)
 	dh_makeshlibs -p$(package-libw-64) -V "$(package-libw-64) $(sodepver)" -- -c4
 endif
 	dh_shlibdeps -a
-	dh_gencontrol -a
 	dh_installdeb -a
+	dh_gencontrol -a
 	# We don't install the tic library in the libtinfo6 udeb, adjust the shlibs file
 	sed -i '/^udeb: libtic /d' debian/$(package-ti)/DEBIAN/shlibs
 	# For the ncurses udeb, we discard libformw, libmenuw and libpanelw as well
@@ -541,17 +462,19 @@ binary-indep: build-indep install-indep
 	dh_testdir
 	dh_testroot
 
-	dh_installdocs -i -Xhtml/Ada95.html -Xhtml/ada/
-	dh_installchangelogs -i NEWS
-	dh_install -i
 	dh_installdirs -i
+	dh_install -i
+	rm -f $$(find debian/$(package-base)/usr/share/terminfo/*/* \
+		| sed 's/$(package-base)/$(package-term)/')
+	dh_installdocs -i -Xhtml/Ada95.html -Xhtml/ada/ debian/FAQ
+	dh_installchangelogs -i NEWS
 	dh_lintian -i
 	dh_link -i
 	dh_compress -i
 	dh_fixperms -i
-	dh_missing -i --fail-missing
-	dh_gencontrol -i
+	dh_missing -i --fail-missing -Xusr/lib
 	dh_installdeb -i
+	dh_gencontrol -i
 	dh_md5sums -i
 	dh_builddeb -i
 

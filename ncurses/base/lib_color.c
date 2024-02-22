@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright 2018-2020,2021 Thomas E. Dickey                                *
+ * Copyright 2018-2022,2023 Thomas E. Dickey                                *
  * Copyright 1998-2016,2017 Free Software Foundation, Inc.                  *
  *                                                                          *
  * Permission is hereby granted, free of charge, to any person obtaining a  *
@@ -49,7 +49,7 @@
 #define CUR SP_TERMTYPE
 #endif
 
-MODULE_ID("$Id: lib_color.c,v 1.148 2021/10/02 22:55:48 tom Exp $")
+MODULE_ID("$Id: lib_color.c,v 1.150 2023/09/16 16:39:15 tom Exp $")
 
 #ifdef USE_TERM_DRIVER
 #define CanChange      InfoOf(SP_PARM).canchange
@@ -93,8 +93,6 @@ NCURSES_EXPORT_VAR(int) COLORS = 0;
 #endif /* !USE_TERM_DRIVER */
 
 #define DATA(r,g,b) {r,g,b, 0,0,0, 0}
-
-#define TYPE_CALLOC(type,elts) typeCalloc(type, (unsigned)(elts))
 
 #define MAX_PALETTE	8
 
@@ -412,7 +410,7 @@ NCURSES_SP_NAME(start_color) (NCURSES_SP_DCL0)
 		if (init_direct_colors(NCURSES_SP_ARG)) {
 		    result = OK;
 		} else {
-		    SP_PARM->_color_table = TYPE_CALLOC(color_t, maxcolors);
+		    TYPE_CALLOC(color_t, maxcolors, SP_PARM->_color_table);
 		    if (SP_PARM->_color_table != 0) {
 			MakeColorPair(SP_PARM->_color_pairs[0],
 				      default_fg(NCURSES_SP_ARG),
@@ -529,7 +527,7 @@ _nc_reserve_pairs(SCREEN *sp, int want)
 	have = sp->_pair_limit;
 
     if (sp->_color_pairs == 0) {
-	sp->_color_pairs = TYPE_CALLOC(colorpair_t, have);
+	TYPE_CALLOC(colorpair_t, have, sp->_color_pairs);
     } else if (have > sp->_pair_alloc) {
 #if NCURSES_EXT_COLORS
 	colorpair_t *next;
@@ -747,7 +745,7 @@ _nc_init_color(SCREEN *sp, int color, int r, int g, int b)
 	NCURSES_PUTP2("initialize_color",
 		      TIPARM_4(initialize_color, color, r, g, b));
 #endif
-	sp->_color_defs = max(color + 1, sp->_color_defs);
+	sp->_color_defs = Max(color + 1, sp->_color_defs);
 
 	result = OK;
     }

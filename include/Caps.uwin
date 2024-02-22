@@ -1,5 +1,5 @@
 ##############################################################################
-# Copyright 2019-2020,2021 Thomas E. Dickey                                  #
+# Copyright 2019-2023,2024 Thomas E. Dickey                                  #
 # Copyright 2001-2015,2016 Free Software Foundation, Inc.                    #
 #                                                                            #
 # Permission is hereby granted, free of charge, to any person obtaining a    #
@@ -29,7 +29,7 @@
 #
 # Author: Thomas Dickey
 #
-# $Id: Caps.uwin,v 1.15 2021/10/08 07:55:48 tom Exp $
+# $Id: Caps.uwin,v 1.19 2024/01/13 22:05:39 tom Exp $
 #
 # This is an adaptation of ncurses' termcap/terminfo capability table, which
 # is designed to align with U/Win's terminfo.
@@ -48,7 +48,7 @@
 #
 # Column 1: terminfo variable name
 # Column 2: terminfo capability name
-# Column 3: capability type (boolean, numeric, or string)
+# Column 3: capability type (Boolean, numeric, or string)
 # Column 4: termcap capability name
 # Column 5: KEY_xxx name, if any, `-' otherwise
 # Column 6: value for KEY_xxx name, if any, `-' otherwise
@@ -158,32 +158,34 @@
 # STANDARD CAPABILITIES
 #
 #%The following is a complete table of the capabilities included in a
-#%terminfo description block and available to terminfo-using code.  In each
-#%line of the table,
-#%
+#%terminfo description block and available to terminfo-using code.
+#%In each line of the table,
+#%.bP
 #%The \fBvariable\fR is the name by which the programmer (at the terminfo level)
 #%accesses the capability.
-#%
-#%The \fBcapname\fR is the short name used in the text of the database,
+#%.bP
+#%The \fBcapname\fR (\fICap-name\fP)
+#%is the short name used in the text of the database,
 #%and is used by a person updating the database.
+#%.IP
 #%Whenever possible, capnames are chosen to be the same as or similar to
 #%the ANSI X3.64-1979 standard (now superseded by ECMA-48, which uses
-#%identical or very similar names).  Semantics are also intended to match
-#%those of the specification.
-#%
-#%The termcap code is the old
-#%.B termcap
-#%capability name (some capabilities are new, and have names which termcap
-#%did not originate).
-#%.P
+#%identical or very similar names).
+#%Semantics are also intended to match those of the specification.
+#%.IP
 #%Capability names have no hard length limit, but an informal limit of 5
 #%characters has been adopted to keep them short and to allow the tabs in
 #%the source file
 #%.B Caps
 #%to line up nicely.
-#%
-#%Finally, the description field attempts to convey the semantics of the
-#%capability.  You may find some codes in the description field:
+#%.bP
+#%The \fBtermcap\fP (\fITcap\fP) code is the old capability name
+#%(some capabilities are new, and have names which termcap did not originate).
+#%.bP
+#%Finally, the \fBdescription\fP field attempts to convey the semantics of the
+#%capability.
+#%.PP
+#%You may find some codes in the description field:
 #%.TP
 #%(P)
 #%indicates that padding may be specified
@@ -202,18 +204,16 @@
 #%.TP
 #%(#\d\fIi\fP\u)
 #%indicates the \fIi\fP\uth\d parameter.
-#%
+#%.
 #%.PP
-#% These are the boolean capabilities:
-#%
-#%.na
-#%.TS H
-#%center expand;
-#%c l l c
-#%c l l c
-#%lw25 lw6 lw2 lw20.
-#%\fBVariable	Cap-	TCap	Description\fR
-#%\fBBooleans	name	Code\fR
+#%.TS
+#%center;
+#%Lb Cb S  Lb
+#%Lb Lb Lb Lb
+#%Lb Lb Lb Lx.
+#%\&	Code	\&
+#%Boolean Capability Name	TI	TC	Description
+#%_
 auto_left_margin		bw	bool	bw	-	-	YB-G-	cub1 wraps from column 0 to last column
 auto_right_margin		am	bool	am	-	-	YBCGE	terminal has automatic margins
 no_esc_ctlc			xsb	bool	xb	-	-	YBCG-	beehive (f1=escape, f2=ctrl C)
@@ -245,18 +245,16 @@ back_color_erase		bce	bool	ut	-	-	-----	screen erased with background color
 can_change			ccc	bool	cc	-	-	-----	terminal can re-define existing colors
 hue_lightness_saturation	hls	bool	hl	-	-	-----	terminal uses only HLS color notation (Tektronix)
 #%.TE
-#%.ad
-#%
-#%These are the numeric capabilities:
-#%
-#%.na
-#%.TS H
-#%center expand;
-#%c l l c
-#%c l l c
-#%lw25 lw6 lw2 lw20.
-#%\fBVariable	Cap-	TCap	Description\fR
-#%\fBNumeric	name	Code\fR
+#%.PP
+#%.
+#%.TS
+#%center;
+#%Lb Cb S  Lb
+#%Lb Lb Lb Lb
+#%Lb Lb Lb Lx.
+#%\&	Code	\&
+#%Numeric Capability Name	TI	TC	Description
+#%_
 columns				cols	num	co	-	-	YBCGE	number of columns in a line
 init_tabs			it	num	it	-	-	YB-G-	tabs initially every # spaces
 lines				lines	num	li	-	-	YBCGE	number of lines on screen or page
@@ -276,24 +274,16 @@ max_colors			colors	num	Co	-	-	-----	maximum number of colors on screen
 max_pairs			pairs	num	pa	-	-	-----	maximum number of color-pairs on the screen
 no_color_video			ncv	num	NC	-	-	-----	video attributes that cannot be used with colors
 #%.TE
-#%.ad
-#%
-#%The following numeric capabilities are present in the SVr4.0 term structure,
-#%but are not yet documented in the man page.  They came in with SVr4's
-#%printer support.
-#%
-#%.na
-#%
-#%These are the string capabilities:
-#%
-#%.na
-#%.TS H
-#%center expand;
-#%c l l c
-#%c l l c
-#%lw25 lw6 lw2 lw20.
-#%\fBVariable	Cap-	TCap	Description\fR
-#%\fBString	name	Code\fR
+#%.PP
+#%.
+#%.TS
+#%center;
+#%Lb Cb S  Lb
+#%Lb Lb Lb Lb
+#%Lb Lb Lb Lx.
+#%\&	Code	\&
+#%String Capability Name	TI	TC	Description
+#%_
 back_tab			cbt	str	bt	-		-	YBCGE	back tab (P)
 bell				bel	str	bl	-		-	YB-GE	audible signal (bell) (P)
 carriage_return			cr	str	cr	-		-	YBCGE	carriage return (P*) (P*)
@@ -593,7 +583,6 @@ set_background			setb	str	Sb	-		-	-----	Set background color #1
 set_color_pair			scp	str	sp	-		-	-----	Set current color pair to #1
 set_foreground			setf	str	Sf	-		-	-----	Set foreground color #1
 #%.TE
-#%.ad
 #%
 # The magic token below tells the tic compiler-generator code that all the caps
 # past it should be ignored (not written out) when dumping terminfo objects. It

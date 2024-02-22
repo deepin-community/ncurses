@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright 2020,2021 Thomas E. Dickey                                     *
+ * Copyright 2020-2022,2023 Thomas E. Dickey                                *
  * Copyright 2008-2016,2017 Free Software Foundation, Inc.                  *
  *                                                                          *
  * Permission is hereby granted, free of charge, to any person obtaining a  *
@@ -39,7 +39,7 @@
 #include <progs.priv.h>
 #include <tty_settings.h>
 
-MODULE_ID("$Id: tabs.c,v 1.50 2021/10/10 00:54:41 tom Exp $")
+MODULE_ID("$Id: tabs.c,v 1.53 2023/11/04 20:46:09 tom Exp $")
 
 static GCC_NORETURN void usage(void);
 
@@ -128,7 +128,7 @@ decode_tabs(const char *tab_list, int margin)
     int prior = 0;
     int ch;
 
-    if (result == 0)
+    if (result == NULL)
 	failed("decode_tabs");
 
     if (margin < 0)
@@ -138,6 +138,8 @@ decode_tabs(const char *tab_list, int margin)
 	if (isdigit(UChar(ch))) {
 	    value *= 10;
 	    value += (ch - '0');
+	    if (value > max_cols)
+		value = max_cols;
 	} else if (ch == ',') {
 	    result[n] = value + prior + margin;
 	    if (n > 0 && result[n] <= result[n - 1]) {
@@ -181,7 +183,7 @@ decode_tabs(const char *tab_list, int margin)
 }
 
 static void
-print_ruler(int *tab_list, const char *new_line)
+print_ruler(const int *const tab_list, const char *new_line)
 {
     int last = 0;
     int n;
@@ -368,7 +370,9 @@ do_set_margin(int margin, bool no_op)
 	    }
 	    tputs(set_left_margin, 1, putch);
 	}
-    } else if (VALID_STRING(set_left_margin_parm)) {
+    }
+#if defined(set_left_margin_parm) && defined(set_right_margin_parm)
+    else if (VALID_STRING(set_left_margin_parm)) {
 	result = TRUE;
 	if (!no_op) {
 	    if (VALID_STRING(set_right_margin_parm)) {
@@ -377,12 +381,16 @@ do_set_margin(int margin, bool no_op)
 		tputs(TIPARM_2(set_left_margin_parm, margin, max_cols), 1, putch);
 	    }
 	}
-    } else if (VALID_STRING(set_lr_margin)) {
+    }
+#endif
+#if defined(set_lr_margin)
+    else if (VALID_STRING(set_lr_margin)) {
 	result = TRUE;
 	if (!no_op) {
 	    tputs(TIPARM_2(set_lr_margin, margin, max_cols), 1, putch);
 	}
     }
+#endif
     return result;
 }
 
@@ -647,7 +655,7 @@ main(int argc, char *argv[])
 	    /* set tty modes to -ocrnl to allow \r */
 	    if (isatty(STDOUT_FILENO)) {
 		TTY new_settings = tty_settings;
-		new_settings.c_oflag &= (unsigned)~OCRNL;
+		new_settings.c_oflag &= (unsigned) ~OCRNL;
 		update_tty_settings(&tty_settings, &new_settings);
 		change_tty = TRUE;
 		new_line = "\r\n";

@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright 2018-2020,2021 Thomas E. Dickey                                *
+ * Copyright 2018-2022,2023 Thomas E. Dickey                                *
  * Copyright 1998-2017,2018 Free Software Foundation, Inc.                  *
  *                                                                          *
  * Permission is hereby granted, free of charge, to any person obtaining a  *
@@ -49,7 +49,7 @@
 #include <parametrized.h>
 #include <transform.h>
 
-MODULE_ID("$Id: tic.c,v 1.307 2021/10/05 08:07:05 tom Exp $")
+MODULE_ID("$Id: tic.c,v 1.324 2023/11/04 19:43:43 tom Exp $")
 
 #define STDIN_NAME "<stdin>"
 
@@ -459,17 +459,20 @@ open_input(const char *filename, char *alt_file)
     if (!strcmp(filename, "-")) {
 	fp = copy_input(stdin, STDIN_NAME, alt_file);
     } else if (stat(filename, &sb) == -1) {
-	fprintf(stderr, "%s: %s %s\n", _nc_progname, filename, strerror(errno));
+	fprintf(stderr, "%s: cannot open '%s': %s\n", _nc_progname,
+		filename, strerror(errno));
 	ExitProgram(EXIT_FAILURE);
     } else if ((mode = (sb.st_mode & S_IFMT)) == S_IFDIR
 	       || (mode != S_IFREG && mode != S_IFCHR && mode != S_IFIFO)) {
-	fprintf(stderr, "%s: %s is not a file\n", _nc_progname, filename);
+	fprintf(stderr, "%s: cannot open '%s'; it is not a file\n",
+		_nc_progname, filename);
 	ExitProgram(EXIT_FAILURE);
     } else {
 	fp = safe_fopen(filename, "r");
 
 	if (fp == NULL) {
-	    fprintf(stderr, "%s: Can't open %s\n", _nc_progname, filename);
+	    fprintf(stderr, "%s: cannot open '%s': %s\n", _nc_progname,
+		    filename, strerror(errno));
 	    ExitProgram(EXIT_FAILURE);
 	}
 	if (mode != S_IFREG) {
@@ -477,7 +480,8 @@ open_input(const char *filename, char *alt_file)
 		FILE *fp2 = copy_input(fp, filename, alt_file);
 		fp = fp2;
 	    } else {
-		fprintf(stderr, "%s: %s is not a file\n", _nc_progname, filename);
+		fprintf(stderr, "%s: cannot open '%s'; it is not a"
+			" file\n", _nc_progname, filename);
 		ExitProgram(EXIT_FAILURE);
 	    }
 	}
@@ -644,7 +648,7 @@ show_databases(const char *outdir)
     const char *tried = 0;
 
     if (outdir == NULL) {
-	outdir = _nc_tic_dir(0);
+	outdir = _nc_tic_dir(NULL);
     }
     if ((result = valid_db_path(outdir)) != 0) {
 	printf("%s\n", result);
@@ -682,7 +686,6 @@ int
 main(int argc, char *argv[])
 {
     char my_tmpname[PATH_MAX];
-    char my_altfile[PATH_MAX];
     int v_opt = -1;
     int smart_defaults = TRUE;
     char *termcap;
@@ -723,7 +726,8 @@ main(int argc, char *argv[])
 	sortmode = S_TERMCAP;
     }
 #if NCURSES_XNAMES
-    use_extended_names(FALSE);
+    /* set this directly to avoid interaction with -v and -D options */
+    _nc_user_definable = FALSE;
 #endif
     _nc_strict_bsd = 0;
 
@@ -776,7 +780,7 @@ main(int argc, char *argv[])
 	    break;
 	case 'D':
 	    debug_level = VtoTrace(v_opt);
-	    set_trace_level(debug_level);
+	    use_verbosity(debug_level);
 	    show_databases(outdir);
 	    ExitProgram(EXIT_SUCCESS);
 	    break;
@@ -854,7 +858,6 @@ main(int argc, char *argv[])
 	    _nc_disable_period = TRUE;
 	    /* FALLTHRU */
 	case 'x':
-	    use_extended_names(TRUE);
 	    using_extensions = TRUE;
 	    break;
 #endif
@@ -864,8 +867,23 @@ main(int argc, char *argv[])
 	last_opt = this_opt;
     }
 
+    /*
+     * If the -v option is set, it may override the $NCURSES_TRACE environment
+     * variable, e.g., for -v3 and up.
+     */
     debug_level = VtoTrace(v_opt);
-    set_trace_level(debug_level);
+    use_verbosity(debug_level);
+
+    /*
+     * Do this after setting debug_level, since the function calls START_TRACE,
+     * which uses the $NCURSES_TRACE environment variable if _nc_tracing bits
+     * for tracing are zero.
+     */
+#if NCURSES_XNAMES
+    if (using_extensions) {
+	use_extended_names(TRUE);
+    }
+#endif
 
     if (_nc_tracing) {
 	save_check_termtype = _nc_check_termtype2;
@@ -933,6 +951,7 @@ main(int argc, char *argv[])
     }
 
     if (tmp_fp == NULL) {
+	char my_altfile[PATH_MAX];
 	tmp_fp = open_input(source_file, my_altfile);
 	if (!strcmp(source_file, "-")) {
 	    source_file = STDIN_NAME;
@@ -1081,7 +1100,7 @@ main(int argc, char *argv[])
 	if (total != 0)
 	    fprintf(log_fp, "%d entries written to %s\n",
 		    total,
-		    _nc_tic_dir((char *) 0));
+		    _nc_tic_dir(NULL));
 	else
 	    fprintf(log_fp, "No entries written\n");
     }
@@ -1154,6 +1173,7 @@ check_acs(TERMTYPE2 *tp)
 	char *q;
 
 	memset(mapped, 0, sizeof(mapped));
+	memset(missing, 0, sizeof(missing));
 	for (p = acs_chars; *p != '\0'; p += 2) {
 	    if (p[1] == '\0') {
 		_nc_warning("acsc has odd number of characters");
@@ -1335,8 +1355,7 @@ check_ansi_cursor(char *list[4])
     for (j = 0; j < 4; ++j) {
 	skip[j] = FALSE;
 	for (k = 0; k < j; ++k) {
-	    if (j != k
-		&& !strcmp(list[j], list[k])) {
+	    if (!strcmp(list[j], list[k])) {
 		char *value = _nc_tic_expand(list[k], TRUE, 0);
 		_nc_warning("repeated cursor control %s", value);
 		repeated = TRUE;
@@ -1741,6 +1760,8 @@ check_screen(TERMTYPE2 *tp)
 	} else if (have_XT && screen_base) {
 	    _nc_warning("screen's \"screen\" entries should not have XT set");
 	} else if (have_XT) {
+	    char *s;
+
 	    if (!have_kmouse && is_screen) {
 		if (VALID_STRING(key_mouse)) {
 		    _nc_warning("value of kmous inconsistent with screen's usage");
@@ -1756,7 +1777,9 @@ check_screen(TERMTYPE2 *tp)
 				"to have 39/49 parameters", name_39_49);
 		}
 	    }
-	    if (VALID_STRING(to_status_line))
+	    if (VALID_STRING(to_status_line)
+		&& (s = strchr(to_status_line, ';')) != NULL
+		&& *++s == '\0')
 		_nc_warning("\"tsl\" capability is redundant, given XT");
 	} else {
 	    if (have_kmouse
@@ -2251,8 +2274,14 @@ check_1_infotocap(const char *name, NCURSES_CONST char *value, int count)
 
     _nc_reset_tparm(NULL);
     switch (actual) {
+    case Str:
+	result = TPARM_1(value, strings[1]);
+	break;
     case Num_Str:
 	result = TPARM_2(value, numbers[1], strings[2]);
+	break;
+    case Str_Str:
+	result = TPARM_2(value, strings[1], strings[2]);
 	break;
     case Num_Str_Str:
 	result = TPARM_3(value, numbers[1], strings[2], strings[3]);
@@ -2415,60 +2444,63 @@ static void
 check_infotocap(TERMTYPE2 *tp, int i, const char *value)
 {
     const char *name = ExtStrname(tp, i, strnames);
-    int params = ((i < (int) SIZEOF(parametrized))
-		  ? parametrized[i]
-		  : ((*value == 'k')
-		     ? 0
-		     : has_params(value, FALSE)));
     char *ti_value = NULL;
-    char *tc_value;
-    bool embedded;
 
     assert(SIZEOF(parametrized) == STRCOUNT);
     if (!VALID_STRING(value) || (ti_value = strdup(value)) == NULL) {
 	_nc_warning("tic-expansion of %s failed", name);
-    } else if ((tc_value = _nc_infotocap(name, ti_value, params)) == ABSENT_STRING) {
-	_nc_warning("tic-conversion of %s failed", name);
-    } else if (params > 0) {
-	int limit = 5;
-	int count;
-	bool first = TRUE;
+    } else {
+	char *tc_value;
+	bool embedded;
+	int params = ((i < (int) SIZEOF(parametrized))
+		      ? parametrized[i]
+		      : ((*value == 'k')
+			 ? 0
+			 : has_params(value, FALSE)));
 
-	if (!strcmp(name, "setf")
-	    || !strcmp(name, "setb")
-	    || !strcmp(name, "setaf")
-	    || !strcmp(name, "setab")) {
-	    if ((limit = max_colors) > 256)
-		limit = 256;
-	}
-	for (count = 0; count < limit; ++count) {
-	    char *ti_check = check_1_infotocap(name, ti_value, count);
-	    char *tc_check = check_1_infotocap(name, tc_value, count);
+	if ((tc_value = _nc_infotocap(name, ti_value, params)) == ABSENT_STRING) {
+	    _nc_warning("tic-conversion of %s failed", name);
+	} else if (params > 0) {
+	    int limit = 5;
+	    int count;
+	    bool first = TRUE;
 
-	    if (strcmp(ti_check, tc_check)) {
-		if (first) {
-		    fprintf(stderr, "check_infotocap(%s)\n", name);
-		    fprintf(stderr, "...ti '%s'\n", _nc_visbuf2(0, ti_value));
-		    fprintf(stderr, "...tc '%s'\n", _nc_visbuf2(0, tc_value));
-		    first = FALSE;
-		}
-		_nc_warning("tparm-conversion of %s(%d) differs between\n\tterminfo %s\n\ttermcap  %s",
-			    name, count,
-			    _nc_visbuf2(0, ti_check),
-			    _nc_visbuf2(1, tc_check));
+	    if (!strcmp(name, "setf")
+		|| !strcmp(name, "setb")
+		|| !strcmp(name, "setaf")
+		|| !strcmp(name, "setab")) {
+		if ((limit = max_colors) > 256)
+		    limit = 256;
 	    }
-	    free(ti_check);
-	    free(tc_check);
+	    for (count = 0; count < limit; ++count) {
+		char *ti_check = check_1_infotocap(name, ti_value, count);
+		char *tc_check = check_1_infotocap(name, tc_value, count);
+
+		if (strcmp(ti_check, tc_check)) {
+		    if (first) {
+			fprintf(stderr, "check_infotocap(%s)\n", name);
+			fprintf(stderr, "...ti '%s'\n", _nc_visbuf2(0, ti_value));
+			fprintf(stderr, "...tc '%s'\n", _nc_visbuf2(0, tc_value));
+			first = FALSE;
+		    }
+		    _nc_warning("tparm-conversion of %s(%d) differs between\n\tterminfo %s\n\ttermcap  %s",
+				name, count,
+				_nc_visbuf2(0, ti_check),
+				_nc_visbuf2(1, tc_check));
+		}
+		free(ti_check);
+		free(tc_check);
+	    }
+	} else if (params == 0 && !same_ti_tc(ti_value, tc_value, &embedded)) {
+	    if (embedded) {
+		_nc_warning("termcap equivalent of %s cannot use embedded delay", name);
+	    } else {
+		_nc_warning("tic-conversion of %s changed value\n\tfrom %s\n\tto   %s",
+			    name, ti_value, tc_value);
+	    }
 	}
-    } else if (params == 0 && !same_ti_tc(ti_value, tc_value, &embedded)) {
-	if (embedded) {
-	    _nc_warning("termcap equivalent of %s cannot use embedded delay", name);
-	} else {
-	    _nc_warning("tic-conversion of %s changed value\n\tfrom %s\n\tto   %s",
-			name, ti_value, tc_value);
-	}
+	free(ti_value);
     }
-    free(ti_value);
 }
 
 static char *
@@ -2717,12 +2749,11 @@ show_fkey_name(NAME_VALUE * data)
 static void
 check_conflict(TERMTYPE2 *tp)
 {
-    bool conflict = FALSE;
-
     if (!(_nc_syntax == SYN_TERMCAP && capdump)) {
 	char *check = calloc((size_t) (NUM_STRINGS(tp) + 1), sizeof(char));
 	NAME_VALUE *given = get_fkey_list(tp);
 	unsigned j, k;
+	bool conflict = FALSE;
 
 	if (check == NULL)
 	    failed("check_conflict");
@@ -2974,6 +3005,190 @@ check_user_capability_type(const char *name, int actual)
 }
 #endif
 
+#define IN_DELAY "0123456789*/."
+
+static bool
+check_ANSI_cap(const char *value, int nparams, char final)
+{
+    bool result = FALSE;
+    if (VALID_STRING(value) && csi_length(value) > 0) {
+	char *p_is_s[NUM_PARM];
+	int popcount;
+	int analyzed = _nc_tparm_analyze(NULL, value, p_is_s, &popcount);
+	if (analyzed < popcount) {
+	    analyzed = popcount;
+	}
+	if (analyzed == nparams) {
+	    bool numbers = TRUE;
+	    int p;
+	    for (p = 0; p < nparams; ++p) {
+		if (p_is_s[p]) {
+		    numbers = FALSE;
+		    break;
+		}
+	    }
+	    if (numbers) {
+		int in_delay = 0;
+		p = (int) strlen(value);
+		while (p-- > 0) {
+		    char ch = value[p];
+		    if (ch == final) {
+			result = TRUE;
+			break;
+		    }
+		    switch (in_delay) {
+		    case 0:
+			if (ch == '>')
+			    in_delay = 1;
+			break;
+		    case 1:
+			if (strchr(IN_DELAY, value[p]) != NULL)
+			    break;
+			if (ch != '<')
+			    p = 0;
+			in_delay = 2;
+			break;
+		    case 2:
+			if (ch != '$')
+			    p = 0;
+			in_delay = 0;
+			break;
+		    }
+		}
+	    }
+	}
+    }
+    return result;
+}
+
+static const char *
+skip_Delay(const char *value)
+{
+    const char *result = value;
+
+    if (*value == '$') {
+	++result;
+	if (*result++ == '<') {
+	    while (strchr(IN_DELAY, *result) != NULL)
+		++result;
+	    if (*result++ != '>') {
+		result = value;
+	    }
+	} else {
+	    result = value;
+	}
+    }
+    return result;
+}
+
+static bool
+isValidString(const char *value, const char *expect)
+{
+    bool result = FALSE;
+    if (VALID_STRING(value)) {
+	if (!strcmp(value, expect))
+	    result = TRUE;
+    }
+    return result;
+}
+
+static bool
+isValidEscape(const char *value, const char *expect)
+{
+    bool result = FALSE;
+    if (VALID_STRING(value)) {
+	if (*value == '\033') {
+	    size_t need = strlen(expect);
+	    size_t have = strlen(value) - 1;
+	    if (have >= need && !strncmp(value + 1, expect, need)) {
+		if (*skip_Delay(value + need + 1) == '\0') {
+		    result = TRUE;
+		}
+	    }
+	}
+    }
+    return result;
+}
+
+static int
+guess_ANSI_VTxx(TERMTYPE2 *tp)
+{
+    int result = -1;
+    int checks = 0;
+
+    /* VT100s have scrolling region, but ANSI (ECMA-48) does not specify */
+    if (check_ANSI_cap(change_scroll_region, 2, 'r') &&
+	(isValidEscape(scroll_forward, "D") ||
+	 isValidString(scroll_forward, "\n") ||
+	 isValidEscape(scroll_forward, "6")) &&
+	(isValidEscape(scroll_reverse, "M") ||
+	 isValidEscape(scroll_reverse, "9"))) {
+	checks |= 2;
+    }
+    if (check_ANSI_cap(cursor_address, 2, 'H') &&
+	check_ANSI_cap(cursor_up, 0, 'A') &&
+	(check_ANSI_cap(cursor_down, 0, 'B') ||
+	 isValidString(cursor_down, "\n")) &&
+	check_ANSI_cap(cursor_right, 0, 'C') &&
+	(check_ANSI_cap(cursor_left, 0, 'D') ||
+	 isValidString(cursor_left, "\b")) &&
+	check_ANSI_cap(clr_eos, 0, 'J') &&
+	check_ANSI_cap(clr_bol, 0, 'K') &&
+	check_ANSI_cap(clr_eol, 0, 'K')) {
+	checks |= 1;
+    }
+    if (checks == 3)
+	result = 1;
+    if (checks == 1)
+	result = 0;
+    return result;
+}
+
+/*
+ * u6/u7 and u8/u9 are query/response extensions which most terminals support.
+ * In particular, any ECMA-48 terminal should support these, though the details
+ * for u9 are implementation dependent.
+ */
+#if defined(user6) && defined(user7) && defined(user8) && defined(user9)
+static void
+check_user_6789(TERMTYPE2 *tp)
+{
+    /*
+     * Check if the terminal is known to not 
+     */
+#define NO_QUERY(longname,shortname) \
+	if (PRESENT(longname)) _nc_warning(#shortname " is not supported")
+    if (tigetflag("NQ") > 0) {
+	NO_QUERY(user6, u6);
+	NO_QUERY(user7, u7);
+	NO_QUERY(user8, u8);
+	NO_QUERY(user9, u9);
+	return;
+    }
+
+    PAIRED(user6, user7);
+    PAIRED(user8, user9);
+
+    if (strchr(tp->term_names, '+') != NULL)
+	return;
+
+    switch (guess_ANSI_VTxx(tp)) {
+    case 1:
+	if (!PRESENT(user8)) {
+	    _nc_warning("expected u8/u9 for device-attributes");
+	}
+	/* FALLTHRU */
+    case 0:
+	if (!PRESENT(user6)) {
+	    _nc_warning("expected u6/u7 for cursor-position");
+	}
+	break;
+    }
+}
+#else
+#define check_user_6789(tp)	/* nothing */
+#endif
+
 /* other sanity-checks (things that we don't want in the normal
  * logic that reads a terminfo entry)
  */
@@ -3022,6 +3237,7 @@ check_termtype(TERMTYPE2 *tp, bool literal)
     check_keypad(tp);
     check_printer(tp);
     check_screen(tp);
+    check_user_6789(tp);
 
     /*
      * These are probably both or none.

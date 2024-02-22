@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright 2021 Thomas E. Dickey                                          *
+ * Copyright 2021,2023 Thomas E. Dickey                                     *
  *                                                                          *
  * Permission is hereby granted, free of charge, to any person obtaining a  *
  * copy of this software and associated documentation files (the            *
@@ -27,13 +27,12 @@
  ****************************************************************************/
 
 /*
- * $Id: term.priv.h,v 1.6 2021/09/26 20:43:08 tom Exp $
+ * $Id: term.priv.h,v 1.8 2023/09/16 15:16:38 tom Exp $
  *
  *	term.priv.h
  *
  *	Header file for terminfo library objects which are private to
  *	the library.
- *
  */
 
 #ifndef _TERM_PRIV_H
@@ -45,6 +44,10 @@ extern "C" {
 #endif
 
 #include <ncurses_cfg.h>
+
+#ifndef __NCURSES_H
+#include <curses.h>
+#endif
 
 #undef NCURSES_OPAQUE
 #define NCURSES_INTERNALS 1
@@ -185,6 +188,7 @@ typedef struct {
 	TGETENT_CACHE	tgetent_cache[TGETENT_MAX];
 	int		tgetent_index;
 	long		tgetent_sequence;
+	int		terminal_count;
 
 	char *		dbd_blob;	/* string-heap for dbd_list[] */
 	char **		dbd_list;	/* distinct places to look for data */
@@ -322,6 +326,8 @@ typedef struct {
 } NCURSES_PRESCREEN;
 
 extern NCURSES_EXPORT_VAR(NCURSES_PRESCREEN) _nc_prescreen;
+
+extern NCURSES_EXPORT(void) _nc_free_tparm(TERMINAL*);
 
 #ifdef __cplusplus
 }

@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright 2018-2020,2021 Thomas E. Dickey                                *
+ * Copyright 2018-2022,2023 Thomas E. Dickey                                *
  * Copyright 1998-2016,2017 Free Software Foundation, Inc.                  *
  *                                                                          *
  * Permission is hereby granted, free of charge, to any person obtaining a  *
@@ -49,7 +49,7 @@
 #include <locale.h>
 #endif
 
-MODULE_ID("$Id: lib_setup.c,v 1.214 2021/09/01 23:38:12 tom Exp $")
+MODULE_ID("$Id: lib_setup.c,v 1.230 2023/11/04 21:02:27 tom Exp $")
 
 /****************************************************************************
  *
@@ -272,6 +272,146 @@ use_tioctl(bool f)
 }
 #endif
 
+#if !(defined(USE_TERM_DRIVER) || defined(EXP_WIN32_DRIVER))
+static void
+_nc_default_screensize(TERMINAL *termp, int *linep, int *colp)
+{
+    /* if we can't get dynamic info about the size, use static */
+    if (*linep <= 0) {
+	*linep = (int) lines;
+    }
+    if (*colp <= 0) {
+	*colp = (int) columns;
+    }
+
+    /* the ultimate fallback, assume fixed 24x80 size */
+    if (*linep <= 0) {
+	*linep = 24;
+    }
+    if (*colp <= 0) {
+	*colp = 80;
+    }
+}
+
+#if defined(USE_CHECK_SIZE) && defined(user6) && defined(user7)
+static const char *
+skip_csi(const char *value)
+{
+    if (UChar(*value) == CSI_CHR) {
+	++value;
+    } else if (*value == ESC_CHR && value[1] == L_BLOCK) {
+	value += 2;
+    }
+    return value;
+}
+
+static bool
+is_expected(const char *value, const char *expected)
+{
+    bool result = FALSE;
+    if (VALID_STRING(value)) {
+	const char *skipped = skip_csi(value);
+	if (skipped != value) {
+	    if (!strcmp(skipped, expected))
+		result = TRUE;
+	}
+    }
+    return result;
+}
+
+static bool
+get_position(TERMINAL *termp, int fd, int *row, int *col)
+{
+    bool result = FALSE;
+    size_t need = strlen(user7);
+    int have;
+
+    have = (int) write(fd, user7, need);
+
+    if (have == (int) need) {
+	int y, x;
+	char buf[20];
+	char *s;
+	char ignore;
+
+	s = memset(buf, '\0', sizeof(buf));
+	do {
+	    size_t ask = (sizeof(buf) - 1 - (size_t) (s - buf));
+	    int got = (int) read(fd, s, ask);
+	    if (got == 0)
+		break;
+	    s += got;
+	    *s = '\0';
+	} while (strchr(buf, 'R') == NULL && (size_t) (s + 1 - buf) < sizeof(buf));
+	T(("response %s", _nc_visbuf(buf)));
+	if (sscanf(skip_csi(buf), "%d;%d%c", &y, &x, &ignore) != 2
+	    || (ignore != 'R' && ignore != ';')) {
+	    *row = y;
+	    *col = x;
+	    result = TRUE;
+	}
+    }
+    T(("get_position %d,%d", *row, *col));
+    return result;
+}
+
+static bool
+set_position(TERMINAL *termp, int fd, int row, int col)
+{
+    bool result = FALSE;
+    char *actual = TIPARM_2(cursor_address, row, col);
+    T(("set_position %d,%d", row, col));
+    if (actual != NULL) {
+	size_t want = strlen(actual);
+	int have = (int) write(fd, actual, want);	/* FIXME - padding */
+	result = ((int) want == have);
+    }
+    return result;
+}
+
+/*
+ * This is a little more complicated than one might expect, because we do this
+ * before setting up the terminal modes, etc.
+ */
+static void
+_nc_check_screensize(TERMINAL *termp, int *linep, int *colp)
+{
+    int fd = fileno(stderr);
+    TTY saved;
+
+    if (NC_ISATTY(fd)
+	&& VALID_STRING(cursor_address)
+	&& is_expected(user7, "6n")
+	&& is_expected(user6, "%i%d;%dR")
+	&& GET_TTY(fd, &saved) == OK) {
+	int current_y, current_x;
+	int updated_y, updated_x;
+	TTY alter = saved;
+
+	alter.c_lflag &= (unsigned) ~(ECHO | ICANON | ISIG | IEXTEN);
+	alter.c_iflag &= (unsigned) ~(IXON | BRKINT | PARMRK);
+	alter.c_cc[VMIN] = 0;
+	alter.c_cc[VTIME] = 1;
+	SET_TTY(fd, &alter);
+
+	if (get_position(termp, fd, &current_y, &current_x)
+	    && set_position(termp, fd, 9999, 9999)
+	    && get_position(termp, fd, &updated_y, &updated_x)) {
+	    *linep = updated_y;
+	    *colp = updated_x;
+	    set_position(termp, fd, current_y, current_x);
+	}
+	/* restore tty modes */
+	SET_TTY(fd, &saved);
+    }
+
+    _nc_default_screensize(termp, linep, colp);
+}
+#else /* !USE_CHECK_SIZE */
+#define _nc_check_screensize(termp, linep, colp)	/* nothing */
+#endif
+#endif /* !(defined(USE_TERM_DRIVER) || defined(EXP_WIN32_DRIVER)) */
+
 NCURSES_EXPORT(void)
 _nc_get_screensize(SCREEN *sp,
 #ifdef USE_TERM_DRIVER
@@ -389,22 +529,10 @@ _nc_get_screensize(SCREEN *sp,
 		*colp = value;
 		T(("screen size: environment COLUMNS = %d", *colp));
 	    }
-	}
 
-	/* if we can't get dynamic info about the size, use static */
-	if (*linep <= 0) {
-	    *linep = (int) lines;
-	}
-	if (*colp <= 0) {
-	    *colp = (int) columns;
-	}
-
-	/* the ultimate fallback, assume fixed 24x80 size */
-	if (*linep <= 0) {
-	    *linep = 24;
-	}
-	if (*colp <= 0) {
-	    *colp = 80;
+	    _nc_default_screensize(termp, linep, colp);
+	} else {
+	    _nc_check_screensize(termp, linep, colp);
 	}
 
 	/*
@@ -419,6 +547,8 @@ _nc_get_screensize(SCREEN *sp,
 	OldNumber(termp, lines) = (short) (*linep);
 	OldNumber(termp, columns) = (short) (*colp);
 #endif
+    } else {
+	_nc_check_screensize(termp, linep, colp);
     }
 
     T(("screen size is %dx%d", *linep, *colp));
@@ -503,6 +633,7 @@ _nc_setup_tinfo(const char *const tn, TERMTYPE2 *const tp)
      */
     if (status == TGETENT_YES) {
 	unsigned n;
+	T(("_nc_setup_tinfo - resetting invalid booleans/strings"));
 	for_each_boolean(n, tp) {
 	    if (!VALID_BOOLEAN(tp->Booleans[n]))
 		tp->Booleans[n] = FALSE;
@@ -517,9 +648,9 @@ _nc_setup_tinfo(const char *const tn, TERMTYPE2 *const tp)
 #endif
 
 /*
-**	Take the real command character out of the CC environment variable
-**	and substitute it in for the prototype given in 'command_character'.
-*/
+ * Take the real command character out of the CC environment variable
+ * and substitute it in for the prototype given in 'command_character'.
+ */
 void
 _nc_tinfo_cmdch(TERMINAL *termp, int proto)
 {
@@ -535,9 +666,12 @@ _nc_tinfo_cmdch(TERMINAL *termp, int proto)
 	char CC = *tmp;
 
 	for_each_string(i, &(termp->type)) {
-	    for (tmp = termp->type.Strings[i]; tmp && *tmp; tmp++) {
-		if (UChar(*tmp) == proto)
-		    *tmp = CC;
+	    tmp = termp->type.Strings[i];
+	    if (VALID_STRING(tmp)) {
+		for (; *tmp; ++tmp) {
+		    if (UChar(*tmp) == proto)
+			*tmp = CC;
+		}
 	    }
 	}
     }
@@ -679,10 +813,9 @@ TINFO_SETUP_TERM(TERMINAL **tp,
 #endif
     }
     myname = strdup(tname);
-
-    if (strlen(myname) > MAX_NAME_SIZE) {
+    if (myname == NULL || strlen(myname) > MAX_NAME_SIZE) {
 	ret_error(TGETENT_ERR,
-		  "TERM environment must be <= %d characters.\n",
+		  "TERM environment must be 1..%d characters.\n",
 		  MAX_NAME_SIZE,
 		  free(myname));
     }
@@ -743,6 +876,7 @@ TINFO_SETUP_TERM(TERMINAL **tp,
 		       "Not enough memory to create terminal structure.\n",
 		       myname, free(myname));
 	}
+	++_nc_globals.terminal_count;
 #if HAVE_SYSCONF
 	{
 	    long limit;
@@ -763,10 +897,14 @@ TINFO_SETUP_TERM(TERMINAL **tp,
 
 #ifdef USE_TERM_DRIVER
 	INIT_TERM_DRIVER();
+	/*
+	 * _nc_get_driver() will call td_CanHandle() for each driver, and win_driver
+	 * needs file descriptor to do the test, so set it before calling.
+	 */
+	termp->Filedes = (short) Filedes;
 	TCB = (TERMINAL_CONTROL_BLOCK *) termp;
 	code = _nc_globals.term_driver(TCB, myname, errret);
 	if (code == OK) {
-	    termp->Filedes = (short) Filedes;
 	    termp->_termname = strdup(myname);
 	} else {
 	    ret_error1(errret ? *errret : TGETENT_ERR,
@@ -818,7 +956,7 @@ TINFO_SETUP_TERM(TERMINAL **tp,
 
 	set_curterm(termp);
 
-	if (command_character)
+	if (VALID_STRING(command_character))
 	    _nc_tinfo_cmdch(termp, UChar(*command_character));
 
 	/*
@@ -830,7 +968,7 @@ TINFO_SETUP_TERM(TERMINAL **tp,
 	if (NC_ISATTY(Filedes)) {
 	    NCURSES_SP_NAME(def_shell_mode) (NCURSES_SP_ARG);
 	    NCURSES_SP_NAME(def_prog_mode) (NCURSES_SP_ARG);
-	    baudrate();
+	    NCURSES_SP_NAME(baudrate) (NCURSES_SP_ARG);
 	}
 	code = OK;
 #endif
@@ -907,6 +1045,7 @@ _nc_forget_prescr(void)
 {
     PRESCREEN_LIST *p, *q;
     pthread_t id = GetThreadID();
+    _nc_lock_global(screen);
     for (p = _nc_prescreen.allocated, q = 0; p != 0; q = p, p = p->next) {
 	if (p->id == id) {
 	    if (q) {
@@ -918,6 +1057,7 @@ _nc_forget_prescr(void)
 	    break;
 	}
     }
+    _nc_unlock_global(screen);
 }
 #endif /* USE_PTHREADS */
 
@@ -989,6 +1129,7 @@ _nc_setupterm(const char *tname,
     int rc = ERR;
     TERMINAL *termp = 0;
 
+    _nc_init_pthreads();
     _nc_lock_global(prescreen);
     START_TRACE();
     if (TINFO_SETUP_TERM(&termp, tname, Filedes, errret, reuse) == OK) {
@@ -998,6 +1139,7 @@ _nc_setupterm(const char *tname,
 	}
     }
     _nc_unlock_global(prescreen);
+
     return rc;
 }
 #endif
