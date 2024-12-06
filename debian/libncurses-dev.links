@@ -1,4 +1,4 @@
-lib/${DEB_HOST_MULTIARCH}/libtinfo.so.6 usr/lib/${DEB_HOST_MULTIARCH}/libtinfo.so
+usr/lib/${DEB_HOST_MULTIARCH}/libtinfo.so.6 usr/lib/${DEB_HOST_MULTIARCH}/libtinfo.so
 usr/lib/${DEB_HOST_MULTIARCH}/libncurses.so usr/lib/${DEB_HOST_MULTIARCH}/libcurses.so
 usr/lib/${DEB_HOST_MULTIARCH}/libtinfo.a usr/lib/${DEB_HOST_MULTIARCH}/libtermcap.a
 usr/bin/ncurses6-config usr/bin/ncurses5-config
