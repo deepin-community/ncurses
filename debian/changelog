@@ -1,3 +1,9 @@
+ncurses (6.4-4deepin1) unstable; urgency=medium
+
+  * Move all libraries to /usr.
+
+ -- Tianyu Chen <sweetyfish@deepin.org>  Fri, 06 Dec 2024 18:11:59 +0800
+
 ncurses (6.4-4) unstable; urgency=medium
 
   * Run autoconf-dickey in the toplevel and test/ directories rather
