@@ -185,7 +185,7 @@ CONFARGS-LEGACY += --with-build-cc=gcc --host=$(DEB_HOST_GNU_TYPE)
 CONFARGS-TEST += --host=$(DEB_HOST_GNU_TYPE)
 endif
 
-# Files for /lib/terminfo.
+# Files for /usr/lib/terminfo.
 libterminfofiles=a/ansi c/cons25 c/cons25-debian c/cygwin d/dumb h/hurd l/linux \
 	m/mach m/mach-bold m/mach-color m/mach-gnu m/mach-gnu-color p/pcansi \
 	r/rxvt r/rxvt-basic r/rxvt-m r/rxvt-unicode r/rxvt-unicode-256color \
@@ -432,10 +432,10 @@ else
 
 endif
 
-	# Move ncurses-base terminfo entries to /lib/terminfo.
+	# Move ncurses-base terminfo entries to /usr/lib/terminfo.
 	set -e; \
 	for f in $(libterminfofiles); do \
-		dir=$(tempdir)/lib/terminfo/$$(dirname $$f); \
+		dir=$(tempdir)/usr/lib/terminfo/$$(dirname $$f); \
 		mkdir -p $$dir; \
 		mv $(tempdir)/usr/share/terminfo/$$f $$dir; \
 	done
