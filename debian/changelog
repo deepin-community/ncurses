@@ -1,3 +1,9 @@
+ncurses (6.4-4deepin2) unstable; urgency=medium
+
+  * Move lib/terminfo to /usr.
+
+ -- Tianyu Chen <sweetyfish@deepin.org>  Fri, 13 Dec 2024 18:08:07 +0800
+
 ncurses (6.4-4deepin1) unstable; urgency=medium
 
   * Move all libraries to /usr.
