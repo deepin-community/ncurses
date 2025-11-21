@@ -1,3 +1,9 @@
+ncurses (6.4-4deepin3) unstable; urgency=medium
+
+  * Add version.
+
+ -- xinpeng.wang <wangxinpeng@uniontech.com>  Fri, 21 Nov 2025 16:00:34 +0800
+
 ncurses (6.4-4deepin2) unstable; urgency=medium
 
   * Move lib/terminfo to /usr.
