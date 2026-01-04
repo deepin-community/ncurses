@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright 2018-2021,2022 Thomas E. Dickey                                *
+ * Copyright 2018-2024,2025 Thomas E. Dickey                                *
  * Copyright 1998-2017,2018 Free Software Foundation, Inc.                  *
  *                                                                          *
  * Permission is hereby granted, free of charge, to any person obtaining a  *
@@ -30,7 +30,7 @@
 /****************************************************************************
  *  Author: Thomas E. Dickey                    1996-on                     *
  ****************************************************************************/
-/* $Id: test.priv.h,v 1.206 2022/12/04 00:08:15 tom Exp $ */
+/* $Id: test.priv.h,v 1.229 2025/12/06 21:21:06 tom Exp $ */
 
 #ifndef __TEST_PRIV_H
 #define __TEST_PRIV_H 1
@@ -73,6 +73,10 @@
 
 #ifndef HAVE_CHGAT
 #define HAVE_CHGAT 0
+#endif
+
+#ifndef HAVE_CLOCK_GETTIME
+#define HAVE_CLOCK_GETTIME 0
 #endif
 
 #ifndef HAVE_COLOR_CONTENT
@@ -179,6 +183,30 @@
 #define HAVE_MATH_H 0
 #endif
 
+#ifndef HAVE_MBLEN
+#define HAVE_MBLEN 0
+#endif
+
+#ifndef HAVE_MBRLEN
+#define HAVE_MBRLEN 0
+#endif
+
+#ifndef HAVE_MBRTOWC
+#define HAVE_MBRTOWC 0
+#endif
+
+#ifndef HAVE_MBSRTOWCS
+#define HAVE_MBSRTOWCS 0
+#endif
+
+#ifndef HAVE_MBSTOWCS
+#define HAVE_MBSTOWCS 0
+#endif
+
+#ifndef HAVE_MBTOWC
+#define HAVE_MBTOWC 0
+#endif
+
 #ifndef HAVE_MENU_H
 #define HAVE_MENU_H 0
 #endif
@@ -271,6 +299,10 @@
 #define HAVE_SYS_SELECT_H 0
 #endif
 
+#ifndef HAVE_SYS_TIME_SELECT
+#define HAVE_SYS_TIME_SELECT 0
+#endif
+
 #ifndef HAVE_TERMATTRS
 #define HAVE_TERMATTRS 0
 #endif
@@ -297,6 +329,18 @@
 
 #ifndef HAVE_TIGETSTR
 #define HAVE_TIGETSTR 0
+#endif
+
+#ifndef HAVE_TIPARM
+#define HAVE_TIPARM 0
+#endif
+
+#ifndef HAVE_TIPARM_S
+#define HAVE_TIPARM_S 0
+#endif
+
+#ifndef HAVE_TISCAN_S
+#define HAVE_TISCAN_S 0
 #endif
 
 #ifndef HAVE_TPUTS_SP
@@ -347,6 +391,18 @@
 #define HAVE_VID_PUTS 0
 #endif
 
+#ifndef HAVE_WCSRTOMBS
+#define HAVE_WCSRTOMBS 0
+#endif
+
+#ifndef HAVE_WCSTOMBS
+#define HAVE_WCSTOMBS 0
+#endif
+
+#ifndef HAVE_WCWIDTH
+#define HAVE_WCWIDTH 0
+#endif
+
 #ifndef HAVE_WINSDELLN
 #define HAVE_WINSDELLN 0
 #endif
@@ -373,6 +429,10 @@
 
 #ifndef NO_LEAKS
 #define NO_LEAKS 0
+#endif
+
+#ifndef HAVE__NC_TPARM_ANALYZE
+#define HAVE__NC_TPARM_ANALYZE 0
 #endif
 
 /*
@@ -466,6 +526,13 @@ extern int optind;
 
 #include <assert.h>
 #include <ctype.h>
+
+#if HAVE_STDINT_H
+#include <stdint.h>
+#define my_intptr_t	intptr_t
+#else
+#define my_intptr_t	long
+#endif
 
 #if defined(_MSC_VER)
 #undef popen
@@ -716,33 +783,49 @@ extern int optind;
 #define HELP_KEY_2	KEY_F(1)
 
 /* our "standard" options for getopt, needed for help2man */
+#define OPTS_COMMAND	'c'
+#define OPTS_LOGGING	'l'
 #define OPTS_USAGE	'h'
 #define OPTS_VERSION	'V'
-#define OPTS_COMMON	"hV"
+#define OPTS_COMMON	"c:l:hV"
 #define USAGE_COMMON	\
  "Common options:"\
 ," -h       show this message"\
 ," -V       show version of curses"
 
+/* reserve -c/-l for command/logging */
+#define CASE_COMMON \
+	case OPTS_COMMAND: \
+	case OPTS_LOGGING: \
+	    usage(ch == OPTS_USAGE); \
+	    ExitProgram(EXIT_FAILURE); \
+	case OPTS_VERSION: \
+	    show_version(argv); \
+	    ExitProgram(EXIT_SUCCESS)
+
 #if HAVE_CURSES_VERSION
-#define format_version(buffer) strcpy(buffer, curses_version())
+#define format_version(buffer, size) _nc_STRCPY(buffer, curses_version(), size)
 #elif defined(NCURSES_VERSION_MAJOR) && defined(NCURSES_VERSION_MINOR) && defined(NCURSES_VERSION_PATCH)
-#define format_version(buffer) sprintf(buffer, "ncurses %d.%d.%d", \
-	NCURSES_VERSION_MAJOR, \
-	NCURSES_VERSION_MINOR, \
-	NCURSES_VERSION_PATCH)
+#define format_version(buffer, size) \
+	_nc_SPRINTF(buffer, _nc_SLIMIT(size) "ncurses %d.%d.%d", \
+		    NCURSES_VERSION_MAJOR, \
+		    NCURSES_VERSION_MINOR, \
+		    NCURSES_VERSION_PATCH)
 #else
-#define format_version(buffer) strcpy(buffer, "ncurses-examples")
+#define format_version(buffer, size) _nc_STRCPY(buffer, "ncurses-examples", size)
 #endif
 
 #define VERSION_COMMON() \
 static char *version_common(char **argv) { \
-	char *base = argv[0]; \
-	char *leaf = strrchr(base, '/'); \
-	char *result = malloc(strlen(base) + 80); \
-	if (leaf++ == NULL) leaf = base; \
-	sprintf(result, "%.20s: ", leaf); \
-	format_version(result + strlen(result)); \
+	const char *base = argv[0]; \
+	const char *part = strrchr(base, '/'); \
+	size_t need = strlen(base) + 80; \
+	char *result = malloc(need); \
+	if (result != NULL) { \
+	    if (part++ == NULL) part = base; \
+	    _nc_SPRINTF(result, _nc_SLIMIT(need) "%.20s: ", part); \
+	    format_version(result + strlen(result), need - strlen(result)); \
+	} \
 	return result; \
 } \
 static void show_version(char **argv) { \
@@ -822,6 +905,12 @@ extern "C" {
 #endif
 
 /*
+ * To make them easier to find, user-defined capabilities used within ncurses
+ * should be tagged with this macro:
+ */
+#define UserCap(name) #name
+
+/*
  * X/Open Curses does not define the arrays of terminfo/termcap names as SVr4
  * curses did, and some implementations provide them anyway, but undeclared.
  */
@@ -885,8 +974,8 @@ extern int TABSIZE;
  * Workaround in case getcchar() returns a positive value when the source
  * string produces only a L'\0'.
  */
-#define TEST_CCHAR(s, count, then_stmt, else_stmt) \
-	if ((count = getcchar(s, NULL, NULL, NULL, NULL)) > 0) { \
+#define TEST_CCHAR(s, then_stmt, else_stmt) \
+	if (getcchar(s, NULL, NULL, NULL, NULL) > 0) { \
 	    wchar_t test_wch[CCHARW_MAX + 2]; \
 	    attr_t test_attrs; \
 	    NCURSES_PAIRS_T test_pair; \
@@ -986,7 +1075,9 @@ extern int TABSIZE;
 
 #define UChar(c)    ((unsigned char)(c))
 
+#ifndef SIZEOF
 #define SIZEOF(table)	(sizeof(table)/sizeof(table[0]))
+#endif
 
 #if defined(NCURSES_VERSION) && HAVE_NC_ALLOC_H
 #include <nc_alloc.h>
@@ -1014,12 +1105,12 @@ extern int TABSIZE;
 #define EXIT_FAILURE 1
 #endif
 
-#undef _NC_WINDOWS
+#undef _NC_WINDOWS_NATIVE
 #if (defined(_WIN32) || defined(_WIN64))
-#define _NC_WINDOWS 1
+#define _NC_WINDOWS_NATIVE 1
 #endif
 
-#if defined(_NC_WINDOWS) || defined(USE_WIN32CON_DRIVER)
+#if defined(_NC_WINDOWS_NATIVE) || defined(USE_WIN32CON_DRIVER)
 
 #if defined(PDCURSES)
 #ifdef WINVER
@@ -1033,11 +1124,8 @@ extern int TABSIZE;
 #include <sys/time.h>		/* for struct timeval */
 #undef sleep
 #define sleep(n) Sleep((n) * 1000)
-#define SIGHUP  1
-#define SIGKILL 9
-#define getlogin() "username"
 
-#elif defined(EXP_WIN32_DRIVER)
+#else /* !PDCURSES */
 
 #if defined(HAVE_NCURSESW_NCURSES_H)
 #include <ncursesw/nc_win32.h>
@@ -1047,23 +1135,23 @@ extern int TABSIZE;
 #include <nc_win32.h>
 #endif
 
-#else
+#endif /* PDCURSES */
 
-#if defined(HAVE_NCURSESW_NCURSES_H)
-#include <ncursesw/nc_mingw.h>
-#elif defined(HAVE_NCURSES_NCURSES_H)
-#include <ncurses/nc_mingw.h>
-#else
-#include <nc_mingw.h>
+#define getlogin() "username"
+
+#ifndef SIGHUP
+#define SIGHUP  1
 #endif
 
+#ifndef SIGKILL
+#define SIGKILL 9
 #endif
 
 /* conflicts in test/firstlast.c */
 #undef large
 #undef small
 
-#endif
+#endif /* WIN32... */
 
 #ifdef NEED_TIME_H
 #if TIME_WITH_SYS_TIME
@@ -1076,6 +1164,26 @@ extern int TABSIZE;
 #  include <time.h>
 # endif
 #endif
+#endif
+
+#if HAVE_CLOCK_GETTIME
+# define GetClockTime(t) clock_gettime(CLOCK_REALTIME, t)
+# define TimeType struct timespec
+# define TimeScale 1000000000L	/* 1e9 */
+# define ElapsedSeconds(b,e) \
+	    (double) (((e)->tv_sec - (b)->tv_sec) \
+		    + ((e)->tv_nsec - (b)->tv_nsec) / TimeScale)
+#elif HAVE_GETTIMEOFDAY
+# define GetClockTime(t) gettimeofday(t, 0)
+# define TimeType struct timeval
+# define TimeScale 1000000L	/* 1e6 */
+# define ElapsedSeconds(b,e) \
+	    (double) (((e)->tv_sec - (b)->tv_sec) \
+		    + ((e)->tv_usec - (b)->tv_usec) / TimeScale)
+#else
+# define TimeType time_t
+# define GetClockTime(t) time((time_t*)0)
+# define ElapsedSeconds(b,e) (double)((e) - (b))
 #endif
 
 /*
@@ -1131,7 +1239,7 @@ extern char *_nc_strstr(const char *, const char *);
 #define InitAndCatch(init,handler) do { init; CATCHALL(handler); } while (0)
 #endif
 
-#if defined(_NC_WINDOWS) || defined(USE_WIN32CON_DRIVER)
+#if defined(_NC_WINDOWS_NATIVE) || defined(USE_WIN32CON_DRIVER)
 #define SetupAlarm(opt)	(void)opt
 #else
 #define SetupAlarm(opt)	if (opt) alarm((unsigned)opt)

@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright 2022 Thomas E. Dickey                                          *
+ * Copyright 2022-2023,2025 Thomas E. Dickey                                *
  *                                                                          *
  * Permission is hereby granted, free of charge, to any person obtaining a  *
  * copy of this software and associated documentation files (the            *
@@ -27,7 +27,7 @@
  ****************************************************************************/
 
 /*
- * $Id: test_delwin.c,v 1.4 2022/12/10 22:14:07 tom Exp $
+ * $Id: test_delwin.c,v 1.6 2025/07/05 15:21:56 tom Exp $
  */
 #include <test.priv.h>
 
@@ -82,11 +82,8 @@ main(int argc, char **argv)
 
     while ((ch = getopt(argc, argv, OPTS_COMMON)) != -1) {
 	switch (ch) {
-	case OPTS_VERSION:
-	    show_version(argv);
-	    ExitProgram(EXIT_SUCCESS);
 	default:
-	    usage(ch == OPTS_USAGE);
+	    CASE_COMMON;
 	    /* NOTREACHED */
 	}
     }
@@ -123,7 +120,7 @@ main(int argc, char **argv)
 
     show_rc("Deleted parent",
 	    "should fail, it still has a subwindow",
-	    rc = delwin(parent));
+	    delwin(parent));
     next_step(stdscr);
     show_rc("Deleted child1",
 	    "should succeed",
