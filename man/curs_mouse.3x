@@ -28,8 +28,8 @@
 .\" authorization.                                                           *
 .\"***************************************************************************
 .\"
-.\" $Id: curs_mouse.3x,v 1.119 2025/02/15 19:36:18 tom Exp $
-.TH curs_mouse 3X 2025-02-15 "ncurses @NCURSES_MAJOR@.@NCURSES_MINOR@" "Library calls"
+.\" $Id: curs_mouse.3x,v 1.131 2025/11/12 01:06:36 tom Exp $
+.TH curs_mouse 3X 2025-11-11 "ncurses @NCURSES_MAJOR@.@NCURSES_MINOR@" "Library calls"
 .ie \n(.g \{\
 .ds `` \(lq
 .ds '' \(rq
@@ -120,9 +120,11 @@ member has exactly one bit set indicating the event type.
 .PP
 .I \%ncurses
 ignores mouse events when input is in canonical (\*(``cooked\*('') mode,
-and produces an error beep when canonical mode is simulated in a window
-by a function such as \fB\%getstr\fP(3X) that expects a linefeed to
-terminate its input loop.
+and produces an error beep when they occur
+while the library simulates canonical mode in a window,
+as with \fB\%getstr\fP(3X)
+(wide-character API users: \fB\%get_wstr\fP(3X)),
+which expects a line feed to terminate its input loop.
 .SS has_mouse
 The terminal type or operating system interface
 must support the encoding of mouse events.
@@ -146,10 +148,11 @@ reports no mouse events.
 .bP
 The function returns an updated copy of
 .I new-mask
-indicating which of the specified mouse events can be reported.
+indicating which event types of interest
+are reportable by the terminal's mouse protocol.
 .IP
 If the screen is not initialized,
-or the terminal interface does report mouse events,
+or the terminal interface does not report mouse events,
 .B \%mousemask
 returns 0.
 .bP
@@ -170,7 +173,7 @@ construct a mask by logically \*(``or\*(''-ing their values.
 .PP
 .TS
 Lb Lb
-Lb Lx.
+Lb Lw(33n)x.
 Name	Description
 =
 BUTTON1_PRESSED	mouse button 1 down
@@ -217,11 +220,11 @@ REPORT_MOUSE_POSITION	report mouse movement
 _
 .TE
 .SS getmouse
-Once a class of mouse events has been made visible in a window,
+When a window is configured to report a non-empty set of event types,
 calling the input character reading function on that window may return
 .B \%KEY_MOUSE
-as an indicator that a mouse event is enqueued.
-To read the event data and pop the event off the queue,
+to indicate availability of an enqueued mouse event.
+To read the event data and remove it from the queue,
 call
 .BR \%getmouse ","
 which returns
@@ -372,20 +375,20 @@ or,
 with motion,
 as a \*(``drag\*(''.
 .PP
-Calling
-.B \%mouseinterval(0)
-disables click resolution.
 When
 .I \%ncurses
 detects a mouse event,
 it awaits further input activity up to this interval,
 and then checks for a subsequent mouse event which can be combined
 with the first event.
-If the timeout expires without input activity
-(which would happen with a zero interval),
+If the timeout expires without input activity,
 then no click resolution occurs.
+Calling
+.B \%mouseinterval(0)
+disables click resolution.
 .PP
-This function returns the previous interval value.
+.B \%mouseinterval
+returns the previous interval value.
 Use
 .B \%mouseinterval(\-1)
 to obtain the interval without altering it.
@@ -579,6 +582,7 @@ prototyped in
 .PP
 .RS 8
 .EX
+.nf
 extern int mouse_set(long int);
 extern int mouse_on(long int);
 extern int mouse_off(long int);
@@ -586,6 +590,7 @@ extern int request_mouse_pos(void);
 extern int map_button(unsigned long);
 extern void wmouse_position(WINDOW *, int *, int *);
 extern unsigned long getmouse(void), getbmap(void);
+.fi
 .EE
 .RE
 .bP
@@ -596,7 +601,7 @@ Its \*(``terminfo\*('' manual page lists capabilities for the feature.
 .\" V1R1.0 C Curses" book, Chapter 17, pp. 179-186 (PDF 213-220).
 .RS 8
 .TS
-Lb Lb Lb Lx.
+Lb Lb Lb Lw(23n)x.
 buttons	btns	BT	T{
 Number of buttons on the mouse
 T}
@@ -661,7 +666,8 @@ Mouse events from
 .I \%xterm
 are
 .I not
-ignored in canonical mode if they have been enabled by
+ignored in canonical (\*(``cooked\*('') mode
+if they have been enabled by
 .BR \%mousemask "."
 Instead,
 the
@@ -685,9 +691,12 @@ to \*(``\eE[M\*(''
 for mouse clicks).
 Other values of
 .B \%key_mouse
-are permitted under the same assumption,
+are permitted under the same assumption \(em
 that is,
-the report begins with that sequence.
+a mouse report begins with the value of the
+.B \%key_mouse
+.RB ( \%kmous )
+string capability.
 .PP
 Because there are no standard response sequences that serve to identify
 terminals supporting the

@@ -27,8 +27,8 @@
 .\" authorization.                                                           *
 .\"***************************************************************************
 .\"
-.\" $Id: curs_instr.3x,v 1.70 2025/02/01 22:54:06 tom Exp $
-.TH curs_instr 3X 2025-02-01 "ncurses @NCURSES_MAJOR@.@NCURSES_MINOR@" "Library calls"
+.\" $Id: curs_instr.3x,v 1.82 2025/10/21 00:04:35 tom Exp $
+.TH curs_instr 3X 2025-10-20 "ncurses @NCURSES_MAJOR@.@NCURSES_MINOR@" "Library calls"
 .ie \n(.g \{\
 .ds `` \(lq
 .ds '' \(rq
@@ -66,8 +66,7 @@ get a string from a \fIcurses\fR window
 \fBint innstr(char * \fIstr\fP, int \fIn\fP);
 \fBint winnstr(WINDOW * \fIwin\fP, char * \fIstr\fP, int \fIn\fP);
 \fBint mvinnstr(int \fIy\fP, int \fIx\fP, char * \fIstr\fP, int \fIn\fP);
-\fBint mvwinnstr(WINDOW * \fIwin\fP, int \fIy\fP, int \fIx\fP, char * \fIstr\fP,
-      int \fIn\fP);
+\fBint mvwinnstr(WINDOW * \fIwin\fP, int \fIy\fP, int \fIx\fP, char * \fIstr\fP, int \fIn\fP);
 .fi
 .SH DESCRIPTION
 .B \%winstr
@@ -101,25 +100,29 @@ then works like
 These functions return the count of characters copied from
 .I win
 to
-.IR str ","
+.I str
+(not including the null terminator),
 or
 .B ERR
 upon failure.
 .PP
 In
 .IR \%ncurses ","
-they return
-.B ERR
-if
+these functions fail if
 .bP
+the
+.I curses
+screen has not been initialized,
+.bP
+(for functions taking a
+.I \%WINDOW
+pointer argument)
 .I win
-is
-.I NULL
+is a null pointer,
 or
 .bP
 .I str
-is
-.IR NULL "."
+is a null pointer.
 .PP
 Functions prefixed with \*(``mv\*('' first perform cursor movement and
 fail if the position
@@ -134,19 +137,14 @@ may be implemented as macros.
 Reading a line that overflows the array pointed to by
 .I str
 with
-.BR \%instr ","
-.BR \%winstr ","
-.BR \%mvinstr ","
-or
-.B \%mvwinstr
-causes undefined results.
-Use of
-.BR \%innstr ","
-.BR \%winnstr ","
-.BR \%mvinnstr ","
-and
-.B \%mvwinnstr
-is recommended instead.
+and its variants causes undefined results.
+Instead,
+use the
+.IR n -infixed
+functions with a positive
+.I n
+argument no larger than the size of the buffer backing
+.IR str "."
 .SH EXTENSIONS
 .BR \%innstr ","
 .BR \%winnstr ","
@@ -169,20 +167,22 @@ X/Open Curses Issue\ 4 describes these functions.
 It specifies no error conditions for them.
 .PP
 X/Open Curses Issues 4 and 7 both state that
-.BR \%instr ","
-.BR \%winstr ","
-.BR \%mvinstr ","
+.IR \%instr ","
+.IR \%winstr ","
+.IR \%mvinstr ","
 and
-.B \%mvwinstr
+.I \%mvwinstr
 return
-.B OK
+.I OK
 rather than a character count.
+.\" X/Open Issue 4, Version 2, p. 117, PDF p. 137
+.\" Issue 7 makes the same claim.
 This is likely an erratum.
 .bP
 SVr3.1 and SVr4 implemented
-.B \%winstr
+.I \%winstr
 as a wrapper around
-.BR \%winnstr ","
+.IR \%winnstr ","
 returning the latter's return value.
 X/Open Curses's specification thus may have been an editorial solecism
 copied from System\ V's documentation
@@ -207,9 +207,6 @@ counts the null terminator that these functions write to
 .SH HISTORY
 SVr3.1 (1987)
 introduced these functions.
-.IR winstr ","
-.IR winnstr ","
-and their variants.
 .SH SEE ALSO
 \fB\%curs_inwstr\fP(3X) describes comparable functions of the
 .I \%ncurses

@@ -49,7 +49,7 @@
 #include <parametrized.h>
 #include <transform.h>
 
-MODULE_ID("$Id: tic.c,v 1.332 2025/01/11 23:52:18 tom Exp $")
+MODULE_ID("$Id: tic.c,v 1.335 2025/12/31 12:03:37 tom Exp $")
 
 #define STDIN_NAME "<stdin>"
 
@@ -458,7 +458,7 @@ open_input(const char *filename, char *alt_file)
 
     if (!strcmp(filename, "-")) {
 	fp = copy_input(stdin, STDIN_NAME, alt_file);
-    } else if (stat(filename, &sb) == -1) {
+    } else if (!_nc_is_path_found(filename, &sb)) {
 	fprintf(stderr, "%s: cannot open '%s': %s\n", _nc_progname,
 		filename, strerror(errno));
 	ExitProgram(EXIT_FAILURE);
@@ -595,17 +595,17 @@ valid_db_path(const char *nominal)
 #endif
 
     DEBUG(1, ("** stat(%s)", result));
-    if (stat(result, &sb) >= 0) {
+    if (_nc_is_path_found(result, &sb)) {
 #if USE_HASHED_DB
 	if (!S_ISREG(sb.st_mode)
-	    || access(result, R_OK | W_OK) != 0) {
+	    || _nc_access(result, R_OK | W_OK) != 0) {
 	    DEBUG(1, ("...not a writable file"));
 	    free(result);
 	    result = NULL;
 	}
 #else
 	if (!S_ISDIR(sb.st_mode)
-	    || access(result, R_OK | W_OK | X_OK) != 0) {
+	    || _nc_access(result, R_OK | W_OK | X_OK) != 0) {
 	    DEBUG(1, ("...not a writable directory"));
 	    free(result);
 	    result = NULL;
@@ -619,7 +619,7 @@ valid_db_path(const char *nominal)
 	if (leaf) {
 	    char save = result[leaf];
 	    result[leaf] = 0;
-	    if (stat(result, &sb) >= 0
+	    if (_nc_is_path_found(result, &sb)
 		&& S_ISDIR(sb.st_mode)
 		&& access(result, R_OK | W_OK | X_OK) == 0) {
 		result[leaf] = save;
@@ -3276,9 +3276,9 @@ check_termtype(TERMTYPE2 *tp, bool literal)
 
 	_nc_tparm_err = 0;
 	if (PRESENT(exit_attribute_mode)) {
-	    zero = strdup(CHECK_SGR(0, exit_attribute_mode));
+	    zero = CHECK_SGR(0, exit_attribute_mode);
 	} else {
-	    zero = strdup(TIPARM_9(set_attributes, 0, 0, 0, 0, 0, 0, 0, 0, 0));
+	    zero = TIPARM_9(set_attributes, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 	}
 	check_tparm_err(0);
 
@@ -3292,7 +3292,6 @@ check_termtype(TERMTYPE2 *tp, bool literal)
 	    CHECK_SGR(7, enter_secure_mode);
 	    CHECK_SGR(8, enter_protected_mode);
 	    CHECK_SGR(9, enter_alt_charset_mode);
-	    free(zero);
 	} else {
 	    _nc_warning("sgr(0) did not return a value");
 	}

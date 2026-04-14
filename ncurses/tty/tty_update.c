@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright 2018-2023,2024 Thomas E. Dickey                                *
+ * Copyright 2018-2024,2025 Thomas E. Dickey                                *
  * Copyright 1998-2016,2017 Free Software Foundation, Inc.                  *
  *                                                                          *
  * Permission is hereby granted, free of charge, to any person obtaining a  *
@@ -85,7 +85,13 @@
 
 #include <ctype.h>
 
-MODULE_ID("$Id: tty_update.c,v 1.317 2024/12/07 18:00:11 tom Exp $")
+#if USE_WIDEC_SUPPORT
+#if HAVE_WCTYPE_H
+#include <wctype.h>
+#endif
+#endif
+
+MODULE_ID("$Id: tty_update.c,v 1.323 2025/12/27 12:34:03 tom Exp $")
 
 /*
  * This define controls the line-breakout optimization.  Every once in a
@@ -211,7 +217,7 @@ GoTo(NCURSES_SP_DCLx int const row, int const col)
 }
 
 #if !NCURSES_WCWIDTH_GRAPHICS
-#define is_wacs_value(ch) (_nc_wacs_width(ch) == 1 && wcwidth(ch) > 1)
+#define is_wacs_value(ch) (_nc_wacs_width((wchar_t) ch) == 1 && wcwidth(ch) > 1)
 #endif /* !NCURSES_WCWIDTH_GRAPHICS */
 
 static NCURSES_INLINE void
@@ -256,8 +262,10 @@ PutAttrChar(NCURSES_SP_DCLx CARG_CH_T ch)
 	 *    not checked.
 	 */
 	if (is8bits(CharOf(CHDEREF(ch)))
-	    && (!is7bits(CharOf(CHDEREF(ch))) && _nc_unicode_locale())
 	    && (isprint(CharOf(CHDEREF(ch)))
+#if USE_WIDEC_SUPPORT
+		|| iswprint((wint_t) CharOf(CHDEREF(ch)))
+#endif
 		|| (SP_PARM->_legacy_coding > 0 && CharOf(CHDEREF(ch)) >= 160)
 		|| (SP_PARM->_legacy_coding > 1 && CharOf(CHDEREF(ch)) >= 128)
 		|| (AttrOf(attr) & A_ALTCHARSET
@@ -283,7 +291,7 @@ PutAttrChar(NCURSES_SP_DCLx CARG_CH_T ch)
 	)) {
 	int c8;
 	my_ch = CHDEREF(ch);	/* work around const param */
-	c8 = CharOf(my_ch);
+	c8 = (int) CharOf(my_ch);
 #if USE_WIDEC_SUPPORT
 	/*
 	 * This is crude & ugly, but works most of the time.  It checks if the
@@ -331,7 +339,7 @@ PutAttrChar(NCURSES_SP_DCLx CARG_CH_T ch)
 	 * drawing flavors are integrated.
 	 */
 	if (AttrOf(attr) & A_ALTCHARSET) {
-	    int j = CharOfD(ch);
+	    int j = (int) CharOfD(ch);
 	    chtype temp = UChar(SP_PARM->_acs_map[j]);
 
 	    if (temp != 0) {
@@ -1091,7 +1099,7 @@ TINFO_DOUPDATE(NCURSES_SP_DCL0)
     returnCode(OK);
 }
 
-#if NCURSES_SP_FUNCS && !defined(USE_TERM_DRIVER)
+#if NCURSES_SP_FUNCS && !USE_TERM_DRIVER
 NCURSES_EXPORT(int)
 doupdate(void)
 {

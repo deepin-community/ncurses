@@ -27,8 +27,8 @@
 .\" authorization.                                                           *
 .\"***************************************************************************
 .\"
-.\" $Id: curs_initscr.3x,v 1.92 2025/02/02 00:01:55 tom Exp $
-.TH curs_initscr 3X 2025-02-01 "ncurses @NCURSES_MAJOR@.@NCURSES_MINOR@" "Library calls"
+.\" $Id: curs_initscr.3x,v 1.112 2025/08/23 22:41:44 tom Exp $
+.TH curs_initscr 3X 2025-08-23 "ncurses @NCURSES_MAJOR@.@NCURSES_MINOR@" "Library calls"
 .ie \n(.g \{\
 .ds `` \(lq
 .ds '' \(rq
@@ -129,9 +129,7 @@ arguments are
 the
 .I type
 of the associated terminal,
-or
-.I NULL
-to use the
+or a null pointer to use the
 .I TERM
 environment variable;
 .bP
@@ -143,9 +141,11 @@ and
 an input stream
 .I inf
 connected to the terminal.
-It returns a variable of structure type
-.I SCREEN
-.BR * ","
+.PP
+.B \%newterm
+returns a variable of
+.RI pointer-to- SCREEN
+type,
 which should be saved for later use with
 .B \%set_term
 and
@@ -165,12 +165,13 @@ it returns to the application.
 .PP
 An application that needs to inspect a terminal type's capabilities,
 so that it can continue to run in a line-oriented mode
-if the terminal cannot support a screen-oriented program,
+if the terminal type does not support capabilities the application
+demands,
 would also use
 .BR \%newterm "."
 If at most one terminal connection is needed,
 the programmer could perform such a capability test,
-decide which mode in which to operate,
+decide the mode in which to operate,
 then call
 .B \%delscreen
 on the pointer returned by
@@ -200,11 +201,17 @@ or temporarily suspending
 management of the terminal.
 .BR \%endwin ":"
 .bP
-resets colors to correspond with the default color pair 0,
+(if \fB\%start_color\fP(3X) has been called)
+resets the terminal's foreground and background colors
+to correspond with those of color pair 0
+(the default pair),
 .bP
 moves the cursor to the lower left-hand corner of the screen,
 .bP
-clears the remainder of the line so that it uses the default colors,
+(if \fB\%start_color\fP(3X) has been called)
+restores the default color pair,
+.bP
+clears the line,
 .bP
 sets the cursor to normal visibility
 (see \fB\%curs_set\fP(3X)),
@@ -226,9 +233,10 @@ to resume managing the terminal.
 .B \%isendwin
 returns
 .B TRUE
-if
+if \fB\%wrefresh\fP(3X)
+has not been called since the most recent
 .B \%endwin
-has been called without any subsequent calls to \fB\%wrefresh\fP(3X),
+call,
 and
 .B FALSE
 otherwise.
@@ -247,12 +255,13 @@ pointer previously returned by
 as an argument,
 and returns the previous one.
 .B \%set_term
-is the only
+is the only standard
 .I curses
 API function that manipulates
 .I SCREEN
 pointers;
-all others affect only the current terminal.
+all others affect only the current terminal
+(but see \fBcurs_sp_funcs\fP(3X)).
 .SS delscreen
 .B \%delscreen
 frees the storage backing the supplied
@@ -266,21 +275,27 @@ after a
 (possibly conditional or temporary)
 suspension;
 see \fB\%curs_kernel\fP(3X).
-Call
+Use
 .B \%delscreen
 after
 .B \%endwin
-when a particular
-.I SCREEN
-structure
-is no longer needed.
+when the application has no more need of a terminal device
+but will not soon exit.
 .SH RETURN VALUE
+.B \%delscreen
+returns no value.
 .B \%endwin
 returns
 .B OK
 on success and
 .B ERR
 on failure.
+.B \%isendwin
+returns
+.B TRUE
+or
+.B FALSE
+as described above.
 .PP
 In
 .IR \%ncurses ","
@@ -293,12 +308,12 @@ if
 .bP
 the terminal was not initialized,
 .bP
-.B \%endwin
-is called more than once without updating the screen,
+it is called more than once without updating the screen,
 or
 .bP
-\fB\%reset_shell_mode\fP(3X) returns
-.BR ERR "."
+its call of \fB\%reset_shell_mode\fP(3X) returns
+.BR ERR ";"
+and
 .RE
 .bP
 .B \%newterm
@@ -306,16 +321,16 @@ returns
 .B ERR
 if it cannot allocate storage for the
 .I SCREEN
-data structure
-or the top-level windows thereof:
+structure
+or the
+.I WINDOW
+structures automatically associated with it:
 .BR \%curscr ","
 .BR \%newscr ","
 and
 .BR \%stdscr "."
 .PP
-Functions that return pointers return
-.I NULL
-on error.
+Functions that return pointers return null pointers on error.
 In
 .IR \%ncurses ","
 .B \%set_term
@@ -413,7 +428,7 @@ At the same time,
 .I \%ncurses
 calls \fB\%resizeterm\fP(3X)
 to adjust the standard screen
-.BR \%stdscr ","
+.B \%stdscr
 and update global variables such as
 .B LINES
 and
@@ -482,8 +497,9 @@ if a
 is no longer needed.
 .bP
 However,
-.IR \%WINDOW s
-are implicitly associated with a
+every
+.I \%WINDOW
+is implicitly associated with a
 .IR SCREEN ","
 so it is reasonable to expect
 .I \%delscreen
@@ -514,9 +530,11 @@ in 2001.
 follows the SVr4 model,
 deleting only the standard
 .I \%WINDOW
-structures.
-.SS "High-level versus Low-level"
-Different implementations may disagree regarding the level of some functions.
+structures and
+.IR \%newscr "."
+.SS "High-level versus Low-level Functions"
+Implementations disagree
+regarding the level of abstraction applicable to a function or property.
 For example,
 .I SCREEN
 (returned by
@@ -528,8 +546,9 @@ descriptors for the output stream.
 If an application switches screens using
 .IR \%set_term ","
 or switches terminals using \fB\%set_curterm\fP(3X),
-applications which use the output file descriptor can have different
-behavior depending on which structure holds the corresponding descriptor.
+applications
+using the output file descriptor can behave differently
+depending on the structure holding the corresponding descriptor.
 .bP
 NetBSD's
 .I \%baudrate
@@ -550,10 +569,10 @@ e.g.,
 \fB\%def_prog_mode\fP(3X).
 SVr4 uses the descriptor in
 .IR SCREEN "."
-.SS "Unset \fITERM\fP Variable"
+.SS "Unset \fITERM\fP Environment Variable"
 If the
 .I TERM
-variable is missing or empty,
+variable is not set in the environment or has an empty value,
 .I \%initscr
 uses the value \*(``unknown\*('',
 which normally corresponds to a terminal entry with the
@@ -563,7 +582,7 @@ capability.
 Generic entries are detected by \fB\%setupterm\fP(3X)
 and cannot be used for full-screen operation.
 Other implementations may handle
-a missing/empty
+a missing or empty
 .I TERM
 variable differently.
 .SS "Signal Handlers"
@@ -589,6 +608,24 @@ with respect to signals.\|.\|.
 Section \*(``NOTES\*('' above discusses
 .IR \%ncurses 's
 signal handlers.
+.SH HISTORY
+4BSD (1980)
+introduced
+.I \%initscr
+and
+.IR \%endwin "."
+.PP
+SVr2 (1984)
+added
+.I \%newterm
+and
+.IR \%set_term "."
+.PP
+SVr3.1 (1987)
+supplied
+.I \%delscreen
+and
+.IR \%isendwin "."
 .SH SEE ALSO
 \fB\%curses\fP(3X),
 \fB\%curs_kernel\fP(3X),

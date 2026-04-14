@@ -28,8 +28,8 @@
 .\" authorization.                                                           *
 .\"***************************************************************************
 .\"
-.\" $Id: curs_inopts.3x,v 1.93 2025/02/02 00:02:25 tom Exp $
-.TH curs_inopts 3X 2025-02-01 "ncurses @NCURSES_MAJOR@.@NCURSES_MINOR@" "Library calls"
+.\" $Id: curs_inopts.3x,v 1.116 2025/10/04 20:15:02 tom Exp $
+.TH curs_inopts 3X 2025-10-04 "ncurses @NCURSES_MAJOR@.@NCURSES_MINOR@" "Library calls"
 .ie \n(.g \{\
 .ds `` \(lq
 .ds '' \(rq
@@ -260,9 +260,13 @@ If
 enabled
 .RI ( bf
 is
-.BR TRUE ),
-the input character reading function returns a value representing
-the function key,
+.BR TRUE ")"
+then when an input character reading function reads ESC,
+it waits for further input corresponding to an escape sequence
+defined by the terminal type description.
+If a valid sequence populates the input stream,
+the input character reading function
+returns a value representing the function key,
 such as
 .BR KEY_LEFT "."
 (Wide-character API users:
@@ -271,6 +275,8 @@ such as
 to indicate the availability of a function key code in its
 .I wch
 parameter.)
+If the sequence is invalid,
+the input character reading function returns only its last character.
 If disabled
 .RI ( bf
 is
@@ -278,14 +284,17 @@ is
 .I curses
 does not treat function keys specially and the program has to interpret
 escape sequences itself.
-If the terminal's keypad can be turned on
-(made to transmit)
-and off
-(made to work locally),
-.B \%keypad
-configures it consistently with the
-.I bf
-parameter.
+If the terminal type description defines the
+.B \%keypad_local
+.RB ( rmkx )
+and
+.B \%keypad_xmit
+.RB ( smkx )
+capabilities,
+enabling a window's keypad mode
+sets the terminal's keypad to transmit,
+and disabling keypad mode
+sets the terminal's keypad to work locally.
 By default,
 a window's keypad mode is off.
 .\"
@@ -322,8 +331,8 @@ and
 .RB ( rmm )
 are defined for the terminal type,
 enabling meta mode sends
-.B smm
-to the terminal and disabling it sends
+.BR smm 's
+value to the terminal and disabling it sends that of
 .B rmm
 to the terminal.
 .\"
@@ -355,17 +364,26 @@ is
 .BR FALSE ),
 the reading function does not return until it has input.
 .SS notimeout
-When the input character reading function reads an ESC character,
-it sets a timer while waiting for the next character.
+When
+.B \%keypad
+has been called on a window
+and the input character reading function reads an ESC character from it,
+.I curses
+sets a timer while waiting for the next character.
+If the timer elapses,
+.I curses
+interprets the ESC as an explicit press of the terminal's Escape key
+(or equivalent).
+.\" like Control+[
 .BI \%notimeout( win ,
 .B TRUE)
 disables this timer.
 The purpose of the timeout is to distinguish sequences produced by a
 function key from those typed by a user.
-To configure the timeout rather than disabling it,
-see
-.B \%wtimeout
-below.
+If this timer is disabled,
+.I curses
+waits forever for subsequent keystrokes
+until it determines the escape sequence to be valid or invalid.
 .\"
 .SS "qiflush, noqiflush"
 .\"
@@ -402,7 +420,7 @@ You may want to call
 in a signal handler if,
 after the handler exits,
 you want output to continue
-as though the interrupt had not occurred.
+as though the signal had not occurred.
 .\"
 .SS "raw, noraw"
 .B raw
@@ -467,10 +485,12 @@ on
 Normally,
 a
 .I curses
-library checks the terminal for input while updating the screen.
-If any is found,
-the update is postponed until the next \fB\%wrefresh\fP(3X) or
-\fB\%doupdate\fP(3X) call,
+library checks the terminal's input file descriptor for activity
+with \fIpoll\fP(2) or \fI\%select\fP(2)
+while updating the screen;
+if it finds any,
+it postpones output
+until the next \fB\%wrefresh\fP(3X) or \fB\%doupdate\fP(3X) call,
 allowing faster response to user key strokes.
 The library tests the file descriptor corresponding to the
 .I FILE
@@ -588,6 +608,43 @@ calls with
 calls leads to terminal driver control states that are hard to predict
 or understand;
 doing so is not recommended.
+.PP
+.I curses
+documentation uses the terms \*(``delay\*('' and \*(``timeout\*(''
+freely to describe two related but distinct aspects of input handling,
+at the risk of confusing the user.
+The functions
+.BR \%halfdelay ","
+.BR \%nodelay ","
+.BR \%timeout ","
+and
+.B \%wtimeout
+configure whether the input character reading function
+\%(\fBwgetch\fP(3X) or \fB\%wget_wch\fP(3X))
+waits for keyboard input to begin,
+and for how long.
+.B \%keypad
+configures whether that function waits for further input
+if the first character it reads is ESC.
+Calling
+.BR \%notimeout ","
+which has nothing to do with
+.B \%timeout
+or
+.BR \%wtimeout ","
+makes this delay in expectation of further characters
+effectively infinite.
+X/Open Curses affords no means of otherwise configuring
+the length of this second delay,
+but an AIX and
+.I \%ncurses
+extension,
+.BR \%ESCDELAY ,
+is available both as an environment variable and a global symbol
+permitting the user and application,
+respectively,
+to do so;
+see \fB\%ncurses\fP(3X) and \fB\%curs_variables\fP(3X).
 .SH EXTENSIONS
 .I \%ncurses
 provides four \*(``is_\*('' functions corresponding to
@@ -661,9 +718,9 @@ function turned it off as a side effect.
 .\" https://github.com/ryanwoodsmall/oldsysv/blob/master/sysv-pdp11_man/a_man/man7/termio.7
 For best portability,
 call
-.B echo
+.I echo
 or
-.B \%noecho
+.I \%noecho
 explicitly just after initialization,
 even if your program retains the terminal's canonical (\*(``cooked\*('')
 line discipline.
@@ -677,7 +734,7 @@ and
 .IR \%nonl "."
 BSD
 .I curses
-did turn off these translations;
+turned off these translations;
 System\ V
 .I curses
 did not.
@@ -690,34 +747,37 @@ connection that the operating system will not alter.
 .PP
 When
 .B \%keypad
-is first enabled,
+is first enabled for a window,
 .I \%ncurses
-loads the key definitions for the current terminal description.
-If the terminal description includes extended string capabilities,
-for example,
-by using the
+loads the standard function key string capabilities
+for the terminal type description of its screen;
+see the entries beginning with \*(``key_\*('' in \fB\%terminfo\fP(5).
+If that description includes extended string capabilities,
+produced by the
 .B \-x
 option of \fB\%@TIC@\fP(1),
+for example,
 then
 .I \%ncurses
-also defines keys for the capabilities whose names begin with
+also defines keys for the capabilities whose codes begin with
 \*(``k\*(''.
-Corresponding key codes are generated and
-(depending on previous loads of terminal descriptions)
-may differ from one execution of a program to the next.
-The generated key codes are recognized by \fB\%keyname\fP(3X),
-which then returns a name beginning with \*(``k\*('' denoting the
+.I \%ncurses
+generates a numeric key code for each such extended capability;
+depending on previous loads of terminal type descriptions,
+these may differ from one execution of a program to the next.
+\fB\%keyname\fP(3X) recognizes the generated key codes
+and returns a name beginning with \*(``k\*('' denoting the
 .I \%term\%info
-capability name rather than \*(``K\*('',
+capability name rather than \*(``KEY_\*('',
 used for
 .I curses
 key names.
 On the other hand,
 an application can use \fB\%define_key\fP(3X) to bind
-a specific key to a string of the programmer's choice.
+a selected key to a string of the programmer's choice.
 This feature enables an application to check for its presence
 with \fB\%tigetstr\fP(3X),
-and reassign the key code to match its own needs.
+and reassign the numeric key code to match its own needs.
 .PP
 Low-level applications can use \fB\%tigetstr\fP(3X) to obtain the
 definition of any string capability.
@@ -743,9 +803,9 @@ key code to be reported.
 In
 .IR \%ncurses ,
 extended capabilities can be interpreted as key definitions.
-These are loaded after the predefined keys,
-and if a capability's value is the same as a previously loaded
-key definition,
+The library loads these after its built-in definitions,
+and if an extended capability's value
+is the same as one previously loaded,
 the library uses the later definition.
 .SH HISTORY
 4BSD (1980)
@@ -817,8 +877,8 @@ to
 .I \%termios
 (the POSIX terminal API).
 In the former,
-both input and output were controlled via a single option
-\*(``CRMOD\*('',
+both input and output conversions were controlled via a single option
+\%\*(``CRMOD\*('',
 while the latter separates these features.
 Because that conversion interferes with output optimization,
 .I \%ncurses

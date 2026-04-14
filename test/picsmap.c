@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright 2018-2023,2024 Thomas E. Dickey                                *
+ * Copyright 2018-2024,2025 Thomas E. Dickey                                *
  * Copyright 2017,2018 Free Software Foundation, Inc.                       *
  *                                                                          *
  * Permission is hereby granted, free of charge, to any person obtaining a  *
@@ -27,7 +27,7 @@
  * authorization.                                                           *
  ****************************************************************************/
 /*
- * $Id: picsmap.c,v 1.153 2024/12/07 22:48:03 tom Exp $
+ * $Id: picsmap.c,v 1.155 2025/07/05 15:11:35 tom Exp $
  *
  * Author: Thomas E. Dickey
  *
@@ -948,7 +948,8 @@ parse_rgb(char **data)
     for (n = 0; data[n] != NULL; ++n) {
 	if (strlen(t = data[n]) >= sizeof(buf) - 1)
 	    continue;
-	t = strcpy(buf, t);
+	_nc_STRCPY(buf, t, sizeof(buf));
+	t = buf;
 	if (*(s = skip_s(t)) == '!')
 	    continue;
 
@@ -1157,7 +1158,8 @@ parse_xpm(char **data)
     for (n = 0; data[n] != NULL; ++n) {
 	if (strlen(s = data[n]) >= sizeof(buf) - 1)
 	    continue;
-	s = strcpy(buf, s);
+	_nc_STRCPY(buf, s, sizeof(buf));
+	s = buf;
 	switch (state) {
 	case 0:
 	    if (match_c(s, " /* XPM */ ")) {
@@ -1786,11 +1788,8 @@ main(int argc, char *argv[])
 	    }
 	    break;
 #endif
-	case OPTS_VERSION:
-	    show_version(argv);
-	    ExitProgram(EXIT_SUCCESS);
 	default:
-	    usage(ch == OPTS_USAGE);
+	    CASE_COMMON;
 	    /* NOTREACHED */
 	}
     }

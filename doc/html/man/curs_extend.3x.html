@@ -28,27 +28,25 @@
   * authorization.                                                           *
   ****************************************************************************
   * Author: Thomas E. Dickey 1999-on
-  * @Id: curs_extend.3x,v 1.54 2025/01/19 00:49:39 tom Exp @
+  * @Id: curs_extend.3x,v 1.67 2025/11/12 00:46:51 tom Exp @
 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN">
 <HTML>
 <HEAD>
 <meta http-equiv="Content-Type" content="text/html; charset=us-ascii">
 <meta name="generator" content="Manpage converted by man2html - see https://invisible-island.net/scripts/readme.html#others_scripts">
-<TITLE>curs_extend 3x 2025-01-18 ncurses 6.5 Library calls</TITLE>
+<TITLE>curs_extend 3x 2025-11-11 ncurses 6.6 Library calls</TITLE>
 <link rel="author" href="mailto:bug-ncurses@gnu.org">
 
 </HEAD>
 <BODY>
-<H1 class="no-header">curs_extend 3x 2025-01-18 ncurses 6.5 Library calls</H1>
+<H1 class="no-header">curs_extend 3x 2025-11-11 ncurses 6.6 Library calls</H1>
 <PRE>
 <STRONG><A HREF="curs_extend.3x.html">curs_extend(3x)</A></STRONG>                  Library calls                 <STRONG><A HREF="curs_extend.3x.html">curs_extend(3x)</A></STRONG>
 
 
-
-
 </PRE><H2><a name="h2-NAME">NAME</a></H2><PRE>
-       <STRONG>curses_version</STRONG>, <STRONG>use_extended_names</STRONG> - miscellaneous <EM>curses</EM> extensions
+       <STRONG>curses_version</STRONG>, <STRONG>use_extended_names</STRONG> - miscellaneous <EM>ncurses</EM> extensions
 
 
 </PRE><H2><a name="h2-SYNOPSIS">SYNOPSIS</a></H2><PRE>
@@ -76,7 +74,7 @@
        <STRONG><A HREF="curs_termcap.3x.html">curs_termcap(3x)</A></STRONG>  interfaces.   Normally  these names are available for
        use, since the essential decision is made through use  of  <STRONG><A HREF="tic.1m.html">tic(1)</A></STRONG>'s  <STRONG>-x</STRONG>
        option  to  include  such  extensions  in  terminal  type descriptions.
-       <STRONG>use_extended_names</STRONG>  can  prevent   <EM>ncurses</EM>   from   recognizing   these
+       <STRONG>use_extended_names(FALSE)</STRONG>  prevents  <EM>ncurses</EM>  from  recognizing   these
        capabilities  to  ensure  compatibility  with  other implementations of
        <EM>curses</EM>.
 
@@ -102,6 +100,9 @@
        Applications employing <EM>ncurses</EM> extensions should condition their use on
        the visibility of the <STRONG>NCURSES_VERSION</STRONG> preprocessor macro.
 
+       NetBSD  9  added a <EM>curses</EM><STRONG>_</STRONG><EM>version</EM> function that intentionally returns a
+       string devoid of version information.
+
 
 </PRE><H2><a name="h2-AUTHORS">AUTHORS</a></H2><PRE>
        Thomas Dickey
@@ -114,9 +115,7 @@
        <STRONG><A HREF="curs_util.3x.html">curs_util(3x)</A></STRONG>,    <STRONG><A HREF="default_colors.3x.html">default_colors(3x)</A></STRONG>,   <STRONG><A HREF="define_key.3x.html">define_key(3x)</A></STRONG>,   <STRONG><A HREF="keybound.3x.html">keybound(3x)</A></STRONG>,
        <STRONG><A HREF="keyok.3x.html">keyok(3x)</A></STRONG>, <STRONG><A HREF="new_pair.3x.html">new_pair(3x)</A></STRONG>, <STRONG><A HREF="resizeterm.3x.html">resizeterm(3x)</A></STRONG>, <STRONG><A HREF="wresize.3x.html">wresize(3x)</A></STRONG>
 
-
-
-ncurses 6.5                       2025-01-18                   <STRONG><A HREF="curs_extend.3x.html">curs_extend(3x)</A></STRONG>
+ncurses 6.6                       2025-11-11                   <STRONG><A HREF="curs_extend.3x.html">curs_extend(3x)</A></STRONG>
 </PRE>
 <div class="nav">
 <ul>

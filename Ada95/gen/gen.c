@@ -35,7 +35,7 @@
 
 /*
     Version Control
-    $Id: gen.c,v 1.80 2025/01/24 20:39:23 tom Exp $
+    $Id: gen.c,v 1.84 2025/11/12 00:49:19 Branden.Robinson Exp $
   --------------------------------------------------------------------------*/
 /*
   This program prints on its standard output the source for the
@@ -203,6 +203,10 @@ main(int argc, const char *argv[])
     {
       fp = fopen(argv[2], "wb");
     }
+  else if (argc == 2 && !strcmp(argv[1], "-?"))
+    {
+      return EXIT_SUCCESS;
+    }
   else if (argc == 2)
     {
       fp = stdout;
@@ -301,7 +305,7 @@ main(int argc, const char *argv[])
   PRINT_NAMED_CONSTANT(E_INVALID_FIELD);
   PRINT_NAMED_CONSTANT(E_CURRENT);
 
-  print_comment(fp, "Input key codes not defined in any ncurses manpage");
+  print_comment(fp, "Input key codes not defined in any ncurses man page");
   PRINT_NAMED_CONSTANT(KEY_MIN);
   PRINT_NAMED_CONSTANT(KEY_MAX);
 #ifdef KEY_CODE_YES

@@ -48,7 +48,7 @@
 
 #include <tic.h>
 
-MODULE_ID("$Id: comp_parse.c,v 1.138 2025/01/12 00:36:01 tom Exp $")
+MODULE_ID("$Id: comp_parse.c,v 1.142 2025/12/31 11:46:54 tom Exp $")
 
 static void sanity_check2(TERMTYPE2 *, bool);
 NCURSES_IMPEXP void (NCURSES_API *_nc_check_termtype2) (TERMTYPE2 *, bool) = sanity_check2;
@@ -111,7 +111,7 @@ check_collisions(char *n1, char *n2, int counter)
 {
     const char *pstart;
     const char *qstart;
-    char *pend, *qend;
+    const char *pend, *qend;
     char nc1[NAMEBUFFER_SIZE];
     char nc2[NAMEBUFFER_SIZE];
 
@@ -630,6 +630,7 @@ _nc_resolve_uses2(bool fullresolve, bool literal)
 		    }
 		}
 		_nc_warning("merge failed, infinite loop");
+		DEBUG(2, (T_RETURN("false")));
 		return FALSE;
 	    }
 	} while
@@ -665,6 +666,9 @@ _nc_resolve_uses2(bool fullresolve, bool literal)
 		TerminalType(&fake_tm) = qp->tterm;
 		_nc_set_screen(&fake_sp);
 		set_curterm(&fake_tm);
+#if USE_TERM_DRIVER
+		((TERMINAL_CONTROL_BLOCK *) (CurTerm))->drv = &_nc_TINFO_DRIVER;
+#endif
 
 		_nc_check_termtype2(&qp->tterm, literal);
 

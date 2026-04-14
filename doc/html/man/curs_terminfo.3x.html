@@ -28,23 +28,21 @@
   * sale, use or other dealings in this Software without prior written       *
   * authorization.                                                           *
   ****************************************************************************
-  * @Id: curs_terminfo.3x,v 1.162 2025/02/15 15:24:18 tom Exp @
+  * @Id: curs_terminfo.3x,v 1.176 2025/11/12 01:06:36 tom Exp @
 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN">
 <HTML>
 <HEAD>
 <meta http-equiv="Content-Type" content="text/html; charset=us-ascii">
 <meta name="generator" content="Manpage converted by man2html - see https://invisible-island.net/scripts/readme.html#others_scripts">
-<TITLE>curs_terminfo 3x 2025-02-15 ncurses 6.5 Library calls</TITLE>
+<TITLE>curs_terminfo 3x 2025-11-11 ncurses 6.6 Library calls</TITLE>
 <link rel="author" href="mailto:bug-ncurses@gnu.org">
 
 </HEAD>
 <BODY>
-<H1 class="no-header">curs_terminfo 3x 2025-02-15 ncurses 6.5 Library calls</H1>
+<H1 class="no-header">curs_terminfo 3x 2025-11-11 ncurses 6.6 Library calls</H1>
 <PRE>
 <STRONG><A HREF="curs_terminfo.3x.html">curs_terminfo(3x)</A></STRONG>                Library calls               <STRONG><A HREF="curs_terminfo.3x.html">curs_terminfo(3x)</A></STRONG>
-
-
 
 
 </PRE><H2><a name="h2-NAME">NAME</a></H2><PRE>
@@ -72,8 +70,7 @@
        <STRONG>int</STRONG> <STRONG>setupterm(const</STRONG> <STRONG>char</STRONG> <STRONG>*</STRONG> <EM>term</EM><STRONG>,</STRONG> <STRONG>int</STRONG> <EM>filedes</EM><STRONG>,</STRONG> <STRONG>int</STRONG> <STRONG>*</STRONG> <EM>errret</EM><STRONG>);</STRONG>
        <STRONG>TERMINAL</STRONG> <STRONG>*</STRONG> <STRONG>set_curterm(TERMINAL</STRONG> <STRONG>*</STRONG> <EM>nterm</EM><STRONG>);</STRONG>
        <STRONG>int</STRONG> <STRONG>del_curterm(TERMINAL</STRONG> <STRONG>*</STRONG> <EM>oterm</EM><STRONG>);</STRONG>
-       <STRONG>int</STRONG> <STRONG>restartterm(const</STRONG> <STRONG>char</STRONG> <STRONG>*</STRONG> <EM>term</EM><STRONG>,</STRONG> <STRONG>int</STRONG> <EM>filedes</EM><STRONG>,</STRONG>
-             <STRONG>int</STRONG> <STRONG>*</STRONG> <EM>errret</EM><STRONG>);</STRONG>
+       <STRONG>int</STRONG> <STRONG>restartterm(const</STRONG> <STRONG>char</STRONG> <STRONG>*</STRONG> <EM>term</EM><STRONG>,</STRONG> <STRONG>int</STRONG> <EM>filedes</EM><STRONG>,</STRONG> <STRONG>int</STRONG> <STRONG>*</STRONG> <EM>errret</EM><STRONG>);</STRONG>
 
        <STRONG>char</STRONG> <STRONG>*</STRONG> <STRONG>tparm(const</STRONG> <STRONG>char</STRONG> <STRONG>*</STRONG> <EM>str</EM><STRONG>,</STRONG> ...<STRONG>);</STRONG>
             <EM>/*</EM> <EM>or</EM> <EM>*/</EM>
@@ -84,8 +81,7 @@
 
        <STRONG>int</STRONG> <STRONG>vidputs(chtype</STRONG> <EM>attrs</EM><STRONG>,</STRONG> <STRONG>int</STRONG> <STRONG>(*</STRONG> <EM>putc</EM><STRONG>)(int));</STRONG>
        <STRONG>int</STRONG> <STRONG>vidattr(chtype</STRONG> <EM>attrs</EM><STRONG>);</STRONG>
-       <STRONG>int</STRONG> <STRONG>vid_puts(attr_t</STRONG> <EM>attrs</EM><STRONG>,</STRONG> <STRONG>short</STRONG> <EM>pair</EM><STRONG>,</STRONG> <STRONG>void</STRONG> <STRONG>*</STRONG> <EM>opts</EM><STRONG>,</STRONG>
-             <STRONG>int</STRONG> <STRONG>(*</STRONG> <EM>putc</EM><STRONG>)(int));</STRONG>
+       <STRONG>int</STRONG> <STRONG>vid_puts(attr_t</STRONG> <EM>attrs</EM><STRONG>,</STRONG> <STRONG>short</STRONG> <EM>pair</EM><STRONG>,</STRONG> <STRONG>void</STRONG> <STRONG>*</STRONG> <EM>opts</EM><STRONG>,</STRONG> <STRONG>int</STRONG> <STRONG>(*</STRONG> <EM>putc</EM><STRONG>)(int));</STRONG>
        <STRONG>int</STRONG> <STRONG>vid_attr(attr_t</STRONG> <EM>attrs</EM><STRONG>,</STRONG> <STRONG>short</STRONG> <EM>pair</EM><STRONG>,</STRONG> <STRONG>void</STRONG> <STRONG>*</STRONG> <EM>opts</EM><STRONG>);</STRONG>
 
        <STRONG>int</STRONG> <STRONG>tigetflag(const</STRONG> <STRONG>char</STRONG> <STRONG>*</STRONG> <EM>cap-code</EM><STRONG>);</STRONG>
@@ -95,8 +91,7 @@
        <STRONG>char</STRONG> <STRONG>*</STRONG> <STRONG>tiparm(const</STRONG> <STRONG>char</STRONG> <STRONG>*</STRONG> <EM>str</EM><STRONG>,</STRONG> ...<STRONG>);</STRONG>
 
        <EM>/*</EM> <EM>extensions</EM> <EM>*/</EM>
-       <STRONG>char</STRONG> <STRONG>*</STRONG> <STRONG>tiparm_s(int</STRONG> <EM>expected</EM><STRONG>,</STRONG> <STRONG>int</STRONG> <EM>mask</EM><STRONG>,</STRONG>
-             <STRONG>const</STRONG> <STRONG>char</STRONG> <STRONG>*</STRONG> <EM>str</EM><STRONG>,</STRONG> <STRONG>...);</STRONG>
+       <STRONG>char</STRONG> <STRONG>*</STRONG> <STRONG>tiparm_s(int</STRONG> <EM>expected</EM><STRONG>,</STRONG> <STRONG>int</STRONG> <EM>mask</EM><STRONG>,</STRONG> <STRONG>const</STRONG> <STRONG>char</STRONG> <STRONG>*</STRONG> <EM>str</EM><STRONG>,</STRONG> <STRONG>...);</STRONG>
        <STRONG>int</STRONG> <STRONG>tiscan_s(int</STRONG> <STRONG>*</STRONG> <EM>expected</EM><STRONG>,</STRONG> <STRONG>int</STRONG> <STRONG>*</STRONG> <EM>mask</EM><STRONG>,</STRONG> <STRONG>const</STRONG> <STRONG>char</STRONG> <STRONG>*</STRONG> <EM>str</EM><STRONG>);</STRONG>
 
        <EM>/*</EM> <EM>deprecated</EM> <EM>*/</EM>
@@ -104,32 +99,32 @@
 
 
 </PRE><H2><a name="h2-DESCRIPTION">DESCRIPTION</a></H2><PRE>
-       These  lower-level  functions  of the <EM>curses</EM> standard must be called by
-       programs that deal  directly  with  the  <EM>terminfo</EM>  database  to  handle
-       certain  terminal capabilities, such as programming function keys.  For
-       all other functionality, <EM>curses</EM> functions are more suitable  and  their
+       These lower-level functions of the <EM>curses</EM> standard must  be  called  by
+       programs  that  deal  directly  with  the  <EM>terminfo</EM>  database to handle
+       certain terminal capabilities, such as programming function keys.   For
+       all  other  functionality, <EM>curses</EM> functions are more suitable and their
        use is recommended.
 
-       None  of  these  functions  use  (or  are aware of) multibyte character
+       None of these functions use  (or  are  aware  of)  multibyte  character
        strings such as UTF-8.
 
        <STRONG>o</STRONG>   Capability names and codes use the POSIX portable character set.
 
-       <STRONG>o</STRONG>   Capability string values have  no  associated  encoding;  they  are
+       <STRONG>o</STRONG>   Capability  string  values  have  no  associated encoding; they are
            strings of 8-bit characters.
 
 
 </PRE><H3><a name="h3-Initialization">Initialization</a></H3><PRE>
-       Call  <STRONG>setupterm</STRONG>  from  your  application  to  have  <EM>terminfo</EM> manage the
-       terminal  device;  this  action  initializes   the   terminal-dependent
-       variables  listed in <STRONG><A HREF="term_variables.3x.html">term_variables(3x)</A></STRONG>.  (A <EM>curses</EM> application calling
+       Call <STRONG>setupterm</STRONG> from  your  application  to  have  <EM>terminfo</EM>  manage  the
+       terminal   device;   this  action  initializes  the  terminal-dependent
+       variables listed in <STRONG><A HREF="term_variables.3x.html">term_variables(3x)</A></STRONG>.  (A <EM>curses</EM> application  calling
        <STRONG><A HREF="curs_initscr.3x.html">initscr(3x)</A></STRONG> or <STRONG><A HREF="curs_initscr.3x.html">newterm(3x)</A></STRONG> achieves the same result.)  Applications can
        use  the  terminal  capabilities either directly, by object definitions
        corresponding to capability names and codes (see <STRONG><A HREF="term_variables.3x.html">term_variables(3x)</A></STRONG>) or
-       by  calling  the  functions documented here.  <STRONG>setupterm</STRONG> initializes the
+       by calling the functions documented here.   <STRONG>setupterm</STRONG>  initializes  the
        <EM>terminfo</EM> variables <STRONG>lines</STRONG> and <STRONG>columns</STRONG> as described in <STRONG><A HREF="curs_util.3x.html">use_env(3x)</A></STRONG>.
 
-       Pass  parameterized  string  capability   values   through   <STRONG>tparm</STRONG>   to
+       Pass   parameterized   string   capability   values  through  <STRONG>tparm</STRONG>  to
        instantiate them.  All <EM>terminfo</EM> strings (including the output of <STRONG>tparm</STRONG>)
        should be sent to  the  terminal  device  with  <STRONG>tputs</STRONG>  or  <STRONG>putp</STRONG>.   Call
        <STRONG><A HREF="curs_kernel.3x.html">reset_shell_mode(3x)</A></STRONG>  to restore the terminal modes before exiting.  (A
@@ -144,14 +139,14 @@
 
        Programs that execute shell subprocesses should
 
-       <STRONG>o</STRONG>   call  <STRONG><A HREF="curs_kernel.3x.html">reset_shell_mode(3x)</A></STRONG> and output <STRONG>exit_ca_mode</STRONG> before the shell
+       <STRONG>o</STRONG>   call <STRONG><A HREF="curs_kernel.3x.html">reset_shell_mode(3x)</A></STRONG> and output <STRONG>exit_ca_mode</STRONG> before the  shell
            is called, and
 
-       <STRONG>o</STRONG>   output <STRONG>enter_ca_mode</STRONG> and call <STRONG><A HREF="curs_kernel.3x.html">reset_prog_mode(3x)</A></STRONG>  after  returning
+       <STRONG>o</STRONG>   output  <STRONG>enter_ca_mode</STRONG>  and call <STRONG><A HREF="curs_kernel.3x.html">reset_prog_mode(3x)</A></STRONG> after returning
            from the shell.
 
-       <STRONG>setupterm</STRONG>  reads  in  the  <EM>terminfo</EM> database, initializing the <EM>terminfo</EM>
-       structures, but does not set up the  output  virtualization  structures
+       <STRONG>setupterm</STRONG> reads in the <EM>terminfo</EM>  database,  initializing  the  <EM>terminfo</EM>
+       structures,  but  does  not set up the output virtualization structures
        used by <EM>curses</EM>.  Its parameters follow.
 
           <EM>term</EM> is the terminal type, a character string.  If <EM>term</EM> is null, the
@@ -202,7 +197,7 @@
        <STRONG>setupterm</STRONG> stores its information  about  the  terminal  in  a  <EM>TERMINAL</EM>
        structure pointed to by the global variable <STRONG>cur_term</STRONG>.  If it detects an
        error,  or  decides  that  the  terminal  is  unsuitable  (hardcopy  or
-       generic),  it  discards  this  information,  making  it  unavailable to
+       generic), it  discards  this  information,  making  it  unavailable  to
        applications.
 
        If <STRONG>setupterm</STRONG> is called repeatedly for the same terminal type, it reuses
@@ -214,10 +209,10 @@
        numeric, and string capabilities use the values from <EM>nterm</EM>.  It returns
        the old value of <STRONG>cur_term</STRONG>.
 
-       <STRONG>del_curterm</STRONG>  frees  the memory pointed to by <EM>oterm</EM>, making it available
-       for further use.  If <EM>oterm</EM> is the same as <STRONG>cur_term</STRONG>, references  to  any
-       of  the  <EM>terminfo</EM>  Boolean, numeric, and string capabilities thereafter
-       may refer to invalid memory locations until <STRONG>setupterm</STRONG> is called again.
+       <STRONG>del_curterm</STRONG>  releases  the memory pointed to by <EM>oterm</EM>.  If <EM>oterm</EM> is the
+       same as <STRONG>cur_term</STRONG>, references to any of the <EM>terminfo</EM>  Boolean,  numeric,
+       and   string  capabilities  thereafter  may  refer  to  invalid  memory
+       locations until <STRONG>setupterm</STRONG> is called again.
 
        <STRONG>restartterm</STRONG> is similar to <STRONG>setupterm</STRONG>, but  is  intended  for  use  after
        restoring  program  memory  to  a  previous  state  (for  example, when
@@ -230,62 +225,61 @@
 
 
 </PRE><H3><a name="h3-Formatting-Output">Formatting Output</a></H3><PRE>
-       <STRONG>tparm</STRONG>  instantiates  the  string  <EM>str</EM> with parameters <EM>pi</EM>.  A pointer is
-       returned to the result of <EM>str</EM> with the parameters applied.  Application
-       developers should keep in mind these quirks of the interface:
+       <STRONG>tparm</STRONG>  instantiates  the  string  <EM>str</EM> with parameters <EM>pi</EM>.  It returns a
+       pointer to a character string  representing  <EM>str</EM>  with  the  parameters
+       applied  to "%" expressions within.  Application developers should keep
+       in mind some quirks of the interface.
 
-       <STRONG>o</STRONG>   Although  <STRONG>tparm</STRONG>'s actual parameters may be integers or strings, the
+       <STRONG>o</STRONG>   Although <STRONG>tparm</STRONG>'s actual parameters may be integers or strings,  the
            prototype expects <EM>long</EM> (integer) values.
 
-       <STRONG>o</STRONG>   Aside from  the  <STRONG>set_attributes</STRONG>  (<STRONG>sgr</STRONG>)  capability,  most  terminal
+       <STRONG>o</STRONG>   Aside  from  the  <STRONG>set_attributes</STRONG>  (<STRONG>sgr</STRONG>)  capability,  most terminal
            capabilities require no more than one or two parameters.
 
-       <STRONG>o</STRONG>   Padding  information  is  ignored  by  <STRONG>tparm</STRONG>;  it is interpreted by
+       <STRONG>o</STRONG>   Padding information is ignored  by  <STRONG>tparm</STRONG>;  it  is  interpreted  by
            <STRONG>tputs</STRONG>.
 
-       <STRONG>o</STRONG>   The capability string is  null-terminated.   Use  "\200"  where  an
+       <STRONG>o</STRONG>   The  capability  string  is  null-terminated.   Use "\200" where an
            ASCII NUL is needed in the output.
 
-       <STRONG>tiparm</STRONG>  is  a  newer  form  of  <STRONG>tparm</STRONG> which uses <EM>stdarg.h</EM> rather than a
-       fixed-parameter list.  Its numeric  parameters  are  <EM>int</EM>s  rather  than
+       <STRONG>tiparm</STRONG> is a newer form of <STRONG>tparm</STRONG> that uses <EM>stdarg.h</EM> rather than a fixed-
+       length parameter list.  Its numeric parameters  are  <EM>int</EM>s  rather  than
        <EM>long</EM>s.
 
-       Both  <STRONG>tparm</STRONG>  and  <STRONG>tiparm</STRONG>  assume that the application passes parameters
-       consistent with the terminal description.  Two extensions are  provided
-       as alternatives to deal with untrusted data.
+       <STRONG>tparm</STRONG>   and  <STRONG>tiparm</STRONG>  assume  that  the  application  passes  parameters
+       consistent  with  the  terminal  description.   <EM>ncurses</EM>  provides   two
+       extensions as alternatives to deal with untrusted data.
 
-       <STRONG>o</STRONG>   <STRONG>tiparm_s</STRONG>  is an extension which is a safer formatting function than
-           <STRONG>tparm</STRONG> or <STRONG>tiparm</STRONG>, because it allows the developer to tell the <EM>curses</EM>
-           library  how  many  parameters to expect in the parameter list, and
-           which may be string parameters.
+       <STRONG>o</STRONG>   The <STRONG>tiparm_s</STRONG> extension is a safer formatting function than <STRONG>tparm</STRONG> or
+           <STRONG>tiparm</STRONG>,  because it allows the developer to tell the <EM>curses</EM> library
+           how many parameters to expect in the parameter list, and which  may
+           be string parameters.
 
-           The <EM>mask</EM> parameter has one bit set for each of the  parameters  (up
+           The  <EM>mask</EM>  parameter has one bit set for each of the parameters (up
            to 9) passed as <EM>char</EM> pointers rather than numbers.
 
-       <STRONG>o</STRONG>   The   extension  <STRONG>tiscan_s</STRONG>  allows  the  application  to  inspect  a
+       <STRONG>o</STRONG>   The  extension  <STRONG>tiscan_s</STRONG>  allows  the  application  to  inspect   a
            formatting capability to see what the <EM>curses</EM> library would assume.
 
 
 </PRE><H3><a name="h3-Output-Functions">Output Functions</a></H3><PRE>
-       String capabilities can contain <EM>padding</EM>, a  time  delay  (accommodating
+       String  capabilities  can  contain <EM>padding</EM>, a time delay (accommodating
        performance limitations of hardware terminals) expressed as <STRONG>$&lt;</STRONG><EM>n</EM><STRONG>&gt;</STRONG>, where
        <EM>n</EM> is a nonnegative integral count of milliseconds.  If <EM>n</EM> exceeds 30,000
-       (thirty seconds), it is capped at that value.
+       (thirty seconds), <EM>ncurses</EM> caps it at that value.
 
-       <STRONG>tputs</STRONG>  interprets  time-delay information in the string <EM>str</EM> and outputs
-       it, executing the delays:
+       <STRONG>tputs</STRONG> interprets time delays in the string <EM>str</EM> and acts upon them.
 
-       <STRONG>o</STRONG>   The <EM>str</EM> parameter must be a <EM>terminfo</EM> string variable or the  return
-           value of <STRONG>tparm</STRONG> or <STRONG>tiparm</STRONG>.
+       <STRONG>o</STRONG>   The <EM>str</EM> parameter must be  a  <EM>terminfo</EM>  string  capability  or  the
+           return value of <STRONG>tparm</STRONG> or <STRONG>tiparm</STRONG>.
 
        <STRONG>o</STRONG>   <EM>affcnt</EM> is the number of lines affected, or <STRONG>1</STRONG> if not applicable.
 
        <STRONG>o</STRONG>   <EM>putc</EM> is a <EM>putchar</EM>-like function to which the characters are passed,
            one at a time.
 
-           If <STRONG>tputs</STRONG> processes  a  time-delay,  it  uses  the  <STRONG><A HREF="curs_util.3x.html">delay_output(3x)</A></STRONG>
-           function,  routing  any  resulting  padding characters through this
-           function.
+       <STRONG>tputs</STRONG>  processes  each  time  delay with the <STRONG><A HREF="curs_util.3x.html">delay_output(3x)</A></STRONG> function,
+       routing any resulting padding characters through this function.
 
        <STRONG>putp</STRONG> calls "<STRONG>tputs(</STRONG><EM>str</EM><STRONG>,</STRONG> <STRONG>1,</STRONG> <STRONG>putchar)</STRONG>".  The output of <STRONG>putp</STRONG> always goes to
        <EM>stdout</EM>, rather than the <EM>filedes</EM> specified in <STRONG>setupterm</STRONG>.
@@ -296,31 +290,31 @@
 
        <STRONG>vidattr</STRONG> is like <STRONG>vidputs</STRONG>, except that it outputs through <STRONG>putchar(3)</STRONG>.
 
-       <STRONG>vid_attr</STRONG>  and <STRONG>vid_puts</STRONG> correspond to <STRONG>vidattr</STRONG> and <STRONG>vidputs</STRONG>, respectively.
-       They use multiple parameters to represent the character attributes  and
+       <STRONG>vid_attr</STRONG> and <STRONG>vid_puts</STRONG> correspond to <STRONG>vidattr</STRONG> and <STRONG>vidputs</STRONG>,  respectively.
+       They  use multiple parameters to represent the character attributes and
        color; namely,
 
        <STRONG>o</STRONG>   <EM>attrs</EM>, of type <EM>attr</EM><STRONG>_</STRONG><EM>t</EM>, for the attributes and
 
        <STRONG>o</STRONG>   <EM>pair</EM>, of type <EM>short</EM>, for the color pair number.
 
-       Use  the  attribute  constants  prefixed  with  "<STRONG>WA_</STRONG>" with <STRONG>vid_attr</STRONG> and
+       Use the attribute constants  prefixed  with  "<STRONG>WA_</STRONG>"  with  <STRONG>vid_attr</STRONG>  and
        <STRONG>vid_puts</STRONG>.
 
-       X/Open Curses reserves the <EM>opts</EM> argument for future  use,  saying  that
-       applications  must  provide  a  null pointer for that argument; but see
+       X/Open  Curses  reserves  the <EM>opts</EM> argument for future use, saying that
+       applications must provide a null pointer for  that  argument;  but  see
        section "EXTENSIONS" below.
 
-       While <STRONG>putp</STRONG> is a lower-level function that  does  not  use  higher-level
-       <EM>curses</EM>  state,  <EM>ncurses</EM> declares it in <EM>curses.h</EM> because System V did so
+       While  <STRONG>putp</STRONG>  is  a  lower-level function that does not use higher-level
+       <EM>curses</EM> state, <EM>ncurses</EM> declares it in <EM>curses.h</EM> because System V  did  so
        (see section "HISTORY" below).
 
 
 </PRE><H3><a name="h3-Terminal-Capability-Functions">Terminal Capability Functions</a></H3><PRE>
-       <STRONG>tigetflag</STRONG>, <STRONG>tigetnum</STRONG>, and <STRONG>tigetstr</STRONG> return the value  of  the  capability
-       corresponding  to  the <EM>terminfo</EM> <EM>cap-code</EM>, such as <STRONG>xenl</STRONG>, passed to them.
-       The <EM>cap-code</EM> for each capability is given in the table column  of  that
-       name in the "Predefined Capabilities" section of <STRONG><A HREF="terminfo.5.html">terminfo(5)</A></STRONG>.
+       <STRONG>tigetflag</STRONG>,  <STRONG>tigetnum</STRONG>,  and  <STRONG>tigetstr</STRONG> return the value of the capability
+       corresponding to the <EM>terminfo</EM> <EM>cap-code</EM>, such as <STRONG>xenl</STRONG>, passed  to  them.
+       The  <EM>cap-code</EM>  for each capability is given in the table column of that
+       name in the "Capabilities" section of <STRONG><A HREF="terminfo.5.html">terminfo(5)</A></STRONG>.
 
        These functions return special values to denote errors.
 
@@ -353,7 +347,7 @@
 
        <STRONG>o</STRONG>   the long <EM>terminfo</EM> names ("fnames")
 
-       for each of the predefined <EM>terminfo</EM> variables:
+       for each standard <EM>terminfo</EM> capability name.
 
               <STRONG>const</STRONG> <STRONG>char</STRONG> <STRONG>*boolnames[]</STRONG>, <STRONG>*boolcodes[]</STRONG>, <STRONG>*boolfnames[]</STRONG>
               <STRONG>const</STRONG> <STRONG>char</STRONG> <STRONG>*numnames[]</STRONG>, <STRONG>*numcodes[]</STRONG>, <STRONG>*numfnames[]</STRONG>
@@ -374,8 +368,8 @@
            6.3, those were shared by all screens.  With <EM>ncurses</EM> 6.3, those are
            allocated per screen.  See <STRONG><A HREF="terminfo.5.html">terminfo(5)</A></STRONG>.
 
-       <STRONG>o</STRONG>   To improve performance, <EM>ncurses</EM> 6.3 caches the result of  analyzing
-           <EM>terminfo</EM>  strings  for  their parameter types.  That is stored as a
+       <STRONG>o</STRONG>   To  improve performance, <EM>ncurses</EM> 6.3 caches the result of analyzing
+           <EM>terminfo</EM> strings for their parameter types.  That is  stored  as  a
            binary tree referenced from the <EM>TERMINAL</EM> structure.
 
        The higher-level <STRONG>initscr</STRONG> and <STRONG>newterm</STRONG> functions use <STRONG>setupterm</STRONG>.  Normally
@@ -389,7 +383,7 @@
 
        In <EM>ncurses</EM>,
 
-       <STRONG>del_curtem</STRONG>
+       <STRONG>del_curterm</STRONG>
             fails if its terminal parameter is null.
 
        <STRONG>putp</STRONG> calls <STRONG>tputs</STRONG>, returning the same error codes.
@@ -416,22 +410,22 @@
 </PRE><H2><a name="h2-NOTES">NOTES</a></H2><PRE>
        The  <STRONG>vid_attr</STRONG> function in <EM>ncurses</EM> is a special case.  It was originally
        implemented based on a draft of X/Open Curses, as a macro, before other
-       parts  of the <EM>ncurses</EM> wide-character API were developed, and unlike the
-       other wide-character functions,  is  also  provided  in  the  non-wide-
+       parts of the <EM>ncurses</EM> wide-character API were developed, and unlike  the
+       other  wide-character  functions,  is  also  provided  in the non-wide-
        character configuration.
 
 
 </PRE><H2><a name="h2-EXTENSIONS">EXTENSIONS</a></H2><PRE>
-       The  functions  marked as extensions originated in <EM>ncurses</EM>, and are not
-       found in SVr4 <EM>curses</EM>, 4.4BSD  <EM>curses</EM>,  or  any  other  previous  <EM>curses</EM>
+       The functions marked as extensions originated in <EM>ncurses</EM>, and  are  not
+       found  in  SVr4  <EM>curses</EM>,  4.4BSD  <EM>curses</EM>,  or any other previous <EM>curses</EM>
        implementation.
 
-       <EM>ncurses</EM>  allows  <EM>opts</EM>  to be a pointer to <EM>int</EM>, which overrides the <EM>pair</EM>
+       <EM>ncurses</EM> allows <EM>opts</EM> to be a pointer to <EM>int</EM>, which  overrides  the  <EM>pair</EM>
        (<EM>short</EM>) argument.
 
 
 </PRE><H2><a name="h2-PORTABILITY">PORTABILITY</a></H2><PRE>
-       Except for <EM>setterm</EM>, X/Open Curses Issue 4  describes  these  functions.
+       Except  for  <EM>setterm</EM>,  X/Open Curses Issue 4 describes these functions.
        It specifies no error conditions for them.
 
        SVr4 describes a successful return value except where "otherwise noted"
@@ -454,7 +448,6 @@
        page.  It further notes that <EM>setterm</EM> was replaced by <EM>setupterm</EM>, stating
        that the call
               setupterm(<EM>term</EM>, 1, (int *)0)
-
        provides the same functionality as
               setterm(<EM>term</EM>)
        and discouraging the latter for new programs.
@@ -493,12 +486,12 @@
        first standardized in the late 1980s.
 
        <STRONG>o</STRONG>   X/Open Curses uses <EM>const</EM>  less  effectively  than  a  later  design
-           might,  sometimes applying it needlessly to values that are already
-           constant, and in most cases overlooking  parameters  that  normally
-           would  benefit  from  <EM>const</EM>.  Passing <EM>const</EM>-qualified parameters to
-           functions that do not declare them <EM>const</EM> may  prevent  the  program
-           from  compiling.   On  the  other  hand,  "writable strings" are an
-           obsolescent C language feature.
+           might, sometimes applying it needlessly to function parameters that
+           are  passed  by  value  (and  therefore  copied), and in most cases
+           overlooking parameters that  normally  would  benefit  from  <EM>const</EM>.
+           Passing <EM>const</EM>-qualified parameters to functions that do not declare
+           them  <EM>const</EM>  may  prevent the program from compiling.  On the other
+           hand, "writable strings" are an obsolescent C language feature.
 
            As an extension, <EM>ncurses</EM> can be configured to change  the  function
            prototypes  to  use  the  <EM>const</EM> keyword.  The <EM>ncurses</EM> ABI 6 enables
@@ -508,31 +501,31 @@
            rather than a variable argument list.
 
            <EM>ncurses</EM> uses a variable argument list, but can be configured to use
-           the fixed-parameter list.   Portable  applications  should  provide
+           the  fixed-parameter  list.   Portable  applications should provide
            nine parameters after the format; zeroes are fine for this purpose.
 
-           In  response  to review comments by Thomas E. Dickey, X/Open Curses
+           In response to review comments by Thomas E. Dickey,  X/Open  Curses
            Issue 7 proposed the <EM>tiparm</EM> function in mid-2009.
 
-           While <EM>tiparm</EM> is always provided  in  <EM>ncurses</EM>,  the  older  form  is
-           available  only  as  a  build-time  configuration  option.   If not
+           While  <EM>tiparm</EM>  is  always  provided  in  <EM>ncurses</EM>, the older form is
+           available only  as  a  build-time  configuration  option.   If  not
            specially configured, <EM>tparm</EM> is the same as <EM>tiparm</EM>.
 
        Both forms of <EM>tparm</EM> have drawbacks.
 
-       <STRONG>o</STRONG>   Most calls to <EM>tparm</EM> require only one or  two  parameters.   Passing
+       <STRONG>o</STRONG>   Most  calls  to  <EM>tparm</EM> require only one or two parameters.  Passing
            nine on each call is awkward.
 
-           Using  <EM>long</EM>  for the numeric parameter type is a workaround to make
-           the parameter use the same amount of stack  memory  as  a  pointer.
-           That  approach  dates  to the mid-1980s, before C was standardized.
-           Since ANSI C (1989), C language standards do not require a  pointer
+           Using <EM>long</EM> for the numeric parameter type is a workaround  to  make
+           the  parameter  use  the  same amount of stack memory as a pointer.
+           That approach dates to the mid-1980s, before  C  was  standardized.
+           Since  ANSI C (1989), C language standards do not require a pointer
            to fit in a <EM>long</EM>).
 
-       <STRONG>o</STRONG>   Providing  the  right  number of parameters for a variadic function
+       <STRONG>o</STRONG>   Providing the right number of parameters for  a  variadic  function
            such  as  <EM>tiparm</EM>  can  be  a  problem,  in  particular  for  string
-           parameters.   However,  only a few <EM>terminfo</EM> capabilities use string
-           parameters (for instance, the ones used for  programmable  function
+           parameters.  However, only a few <EM>terminfo</EM> capabilities  use  string
+           parameters  (for  instance, the ones used for programmable function
            keys).
 
            The <EM>ncurses</EM> library checks usage of these capabilities, and returns
@@ -540,40 +533,44 @@
            check if a calling program provides strings in the right places for
            the <EM>tparm</EM> calls.
 
-           <EM>ncurses</EM>'s <STRONG><A HREF="tput.1.html">tput(1)</A></STRONG> checks its  use  of  these  capabilities  with  a
+           <EM>ncurses</EM>'s  <STRONG><A HREF="tput.1.html">tput(1)</A></STRONG>  checks  its  use  of  these capabilities with a
            table, so that it calls <EM>tparm</EM> correctly.
 
-   <STRONG>Special</STRONG> <EM>TERM</EM> <STRONG>treatment</STRONG>
-       If  <EM>ncurses</EM> is configured to use the terminal driver, as with the MinGW
-       port,
 
-       <STRONG>o</STRONG>   <EM>setupterm</EM> interprets a missing/empty <EM>TERM</EM> variable as  the  special
-           value "unknown".
+</PRE><H3><a name="h3-Special-TERM-treatment">Special TERM treatment</a></H3><PRE>
+       If <EM>ncurses</EM> is configured to use a terminal driver that does not  employ
+       the POSIX <EM>termios</EM> API, as with the MinGW port,
+
+       <STRONG>o</STRONG>   <EM>setupterm</EM>  interprets  a  missing  or  empty  <EM>TERM</EM>  variable as the
+           special value "unknown".
 
            SVr4 <EM>curses</EM> uses the special value "dumb".
 
-           The  difference  between  the  two  is  that  the  former  uses the
-           <STRONG>generic_type</STRONG> (<STRONG>gn</STRONG>) <EM>terminfo</EM> capability, while the latter  does  not.
+           The difference  between  the  two  is  that  the  former  uses  the
+           <STRONG>generic_type</STRONG>  (<STRONG>gn</STRONG>)  <EM>terminfo</EM> capability, while the latter does not.
            A generic terminal is unsuitable for full-screen applications.
 
-       <STRONG>o</STRONG>   <EM>setupterm</EM>  allows  explicit  use  of  the Microsoft Windows console
-           driver by checking whether the <EM>TERM</EM> environment  variable  has  the
+       <STRONG>o</STRONG>   <EM>setupterm</EM> allows explicit use  of  the  Microsoft  Windows  console
+           driver  by  checking  whether the <EM>TERM</EM> environment variable has the
            value "#win32con" or an abbreviation of that string.
 
 
 </PRE><H3><a name="h3-Other-Portability-Issues">Other Portability Issues</a></H3><PRE>
-       In  SVr4,  <EM>set</EM><STRONG>_</STRONG><EM>curterm</EM>  returns  an  <EM>int</EM>, <EM>OK</EM> or <EM>ERR</EM>.  We have chosen to
+       In SVr4, <EM>set</EM><STRONG>_</STRONG><EM>curterm</EM> returns an <EM>int</EM>, <EM>OK</EM> or  <EM>ERR</EM>.   We  have  chosen  to
        implement the X/Open Curses semantics.
 
        In SVr4, the third argument of <EM>tputs</EM> has the type "<STRONG>int</STRONG> <STRONG>(*)(char)</STRONG>".
 
-       At least one implementation of X/Open Curses (Solaris <EM>xcurses</EM>)  returns
+       At  least one implementation of X/Open Curses (Solaris <EM>xcurses</EM>) returns
        a value other than <EM>OK</EM> or <EM>ERR</EM> from <EM>tputs</EM>.  It instead returns the length
        of the string, and does no error checking.
 
+       Very old versions of AIX <EM>curses</EM> required inclusion of  <EM>curses.h</EM>  before
+       <EM>term.h</EM>.
+
 
 </PRE><H2><a name="h2-HISTORY">HISTORY</a></H2><PRE>
-       SVr2 (1984) introduced the <EM>terminfo</EM> feature.   Its  programming  manual
+       SVr2  (1984)  introduced  the <EM>terminfo</EM> feature.  Its programming manual
        mentioned the following low-level functions.
 
        <STRONG>Function</STRONG>    <STRONG>Description</STRONG>
@@ -593,7 +590,7 @@
        <EM>vidattr</EM>     like <EM>vidputs</EM>, but output through <EM>putchar</EM>
        <EM>vidputs</EM>     write string to terminal, applying specified attributes
 
-       The  programming  manual  also mentioned functions provided for <EM>termcap</EM>
+       The programming manual also mentioned functions  provided  for  <EM>termcap</EM>
        compatibility (commenting that they "may go away at a later date").
 
        <STRONG>Function</STRONG>   <STRONG>Description</STRONG>
@@ -605,11 +602,11 @@
        <EM>tgoto</EM>      apply parameters to given capability
        <EM>tputs</EM>      write characters via a function parameter, applying padding
 
-       Early <EM>terminfo</EM> programs obtained capability values  from  the  <EM>TERMINAL</EM>
+       Early  <EM>terminfo</EM>  programs  obtained capability values from the <EM>TERMINAL</EM>
        structure initialized by <EM>setupterm</EM>.
 
-       SVr3   (1987)   extended  <EM>terminfo</EM>  by  adding  functions  to  retrieve
-       capability values (like the <EM>termcap</EM> interface), and reusing  <EM>tgoto</EM>  and
+       SVr3  (1987)  extended  <EM>terminfo</EM>  by  adding  functions   to   retrieve
+       capability  values  (like the <EM>termcap</EM> interface), and reusing <EM>tgoto</EM> and
        <EM>tputs</EM>.
 
        <STRONG>Function</STRONG>    <STRONG>Description</STRONG>
@@ -618,7 +615,7 @@
        <EM>tigetnum</EM>    get numeric entry for given <EM>id</EM>
        <EM>tigetstr</EM>    get string entry for given <EM>id</EM>
 
-       SVr3  also  replaced several of the SVr2 <EM>terminfo</EM> functions that had no
+       SVr3 also replaced several of the SVr2 <EM>terminfo</EM> functions that  had  no
        counterpart in the <EM>termcap</EM> interface, documenting them as obsolete.
 
        <STRONG>Function</STRONG>    <STRONG>Replaced</STRONG> <STRONG>by</STRONG>
@@ -631,37 +628,35 @@
        <EM>saveterm</EM>    <EM>def</EM><STRONG>_</STRONG><EM>prog</EM><STRONG>_</STRONG><EM>mode</EM>
        <EM>setterm</EM>     <EM>setupterm</EM>
 
-       SVr3 kept the <EM>mvcur</EM>, <EM>vidattr</EM>, and <EM>vidputs</EM> functions, along  with  <EM>putp</EM>,
-       <EM>tparm</EM>,  and  <EM>tputs</EM>.   The latter were needed to support padding, and to
-       handle capabilities accessed by functions such as <EM>vidattr</EM>  (which  used
+       SVr3  kept  the <EM>mvcur</EM>, <EM>vidattr</EM>, and <EM>vidputs</EM> functions, along with <EM>putp</EM>,
+       <EM>tparm</EM>, and <EM>tputs</EM>.  The latter were needed to support  padding,  and  to
+       handle  capabilities  accessed by functions such as <EM>vidattr</EM> (which used
        more than the two parameters supported by <EM>tgoto</EM>).
 
-       SVr3   introduced   the   functions   for  switching  between  terminal
-       descriptions;  for  example,  <EM>set</EM><STRONG>_</STRONG><EM>curterm</EM>.   Some   changes   reflected
+       SVr3  introduced  the  functions   for   switching   between   terminal
+       descriptions;   for   example,  <EM>set</EM><STRONG>_</STRONG><EM>curterm</EM>.   Some  changes  reflected
        incremental improvements to the SVr2 library.
 
-       <STRONG>o</STRONG>   The  <EM>TERMINAL</EM>  type  definition  was introduced in SVr3.01, for the
+       <STRONG>o</STRONG>   The <EM>TERMINAL</EM> type definition was introduced  in  SVr3.01,  for  the
            <EM>term</EM> structure provided in SVr2.
 
-       <STRONG>o</STRONG>   Various global variables such as <EM>boolnames</EM> were  mentioned  in  the
-           programming  manual  at  this  point, though the variables had been
+       <STRONG>o</STRONG>   Various  global  variables  such as <EM>boolnames</EM> were mentioned in the
+           programming manual at this point, though  the  variables  had  been
            provided in SVr2.
 
        SVr4 (1989) added the <EM>vid</EM><STRONG>_</STRONG><EM>attr</EM> and <EM>vid</EM><STRONG>_</STRONG><EM>puts</EM> functions.
 
-       Other low-level functions are declared in the <EM>curses</EM>  header  files  of
-       Unix  systems,  but  none are documented.  Those noted as "obsolete" by
+       Other  low-level  functions  are declared in the <EM>curses</EM> header files of
+       Unix systems, but none are documented.  Those noted  as  "obsolete"  by
        SVr3 remained in use by System V's <STRONG>vi(1)</STRONG> editor.
 
 
 </PRE><H2><a name="h2-SEE-ALSO">SEE ALSO</a></H2><PRE>
        <STRONG><A HREF="ncurses.3x.html">curses(3x)</A></STRONG>,   <STRONG><A HREF="curs_initscr.3x.html">curs_initscr(3x)</A></STRONG>,   <STRONG><A HREF="curs_kernel.3x.html">curs_kernel(3x)</A></STRONG>,   <STRONG><A HREF="curs_memleaks.3x.html">curs_memleaks(3x)</A></STRONG>,
-       <STRONG><A HREF="curs_termcap.3x.html">curs_termcap(3x)</A></STRONG>,   <STRONG><A HREF="curs_variables.3x.html">curs_variables(3x)</A></STRONG>,   <STRONG>putc(3)</STRONG>,  <STRONG><A HREF="term_variables.3x.html">term_variables(3x)</A></STRONG>,
+       <STRONG><A HREF="curs_termcap.3x.html">curs_termcap(3x)</A></STRONG>,  <STRONG><A HREF="curs_variables.3x.html">curs_variables(3x)</A></STRONG>,   <STRONG>putc(3)</STRONG>,   <STRONG><A HREF="term_variables.3x.html">term_variables(3x)</A></STRONG>,
        <STRONG><A HREF="terminfo.5.html">terminfo(5)</A></STRONG>
 
-
-
-ncurses 6.5                       2025-02-15                 <STRONG><A HREF="curs_terminfo.3x.html">curs_terminfo(3x)</A></STRONG>
+ncurses 6.6                       2025-11-11                 <STRONG><A HREF="curs_terminfo.3x.html">curs_terminfo(3x)</A></STRONG>
 </PRE>
 <div class="nav">
 <ul>
@@ -688,6 +683,7 @@ ncurses 6.5                       2025-02-15                 <STRONG><A HREF="cu
 <li><a href="#h3-Legacy-Data">Legacy Data</a></li>
 <li><a href="#h3-Output-Buffering">Output Buffering</a></li>
 <li><a href="#h3-Function-Prototypes">Function Prototypes</a></li>
+<li><a href="#h3-Special-TERM-treatment">Special TERM treatment</a></li>
 <li><a href="#h3-Other-Portability-Issues">Other Portability Issues</a></li>
 </ul>
 </li>

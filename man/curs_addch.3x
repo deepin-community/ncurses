@@ -28,8 +28,8 @@
 .\" authorization.                                                           *
 .\"***************************************************************************
 .\"
-.\" $Id: curs_addch.3x,v 1.122 2025/02/01 23:54:03 tom Exp $
-.TH curs_addch 3X 2025-02-01 "ncurses @NCURSES_MAJOR@.@NCURSES_MINOR@" "Library calls"
+.\" $Id: curs_addch.3x,v 1.144 2025/11/12 01:04:12 tom Exp $
+.TH curs_addch 3X 2025-11-11 "ncurses @NCURSES_MAJOR@.@NCURSES_MINOR@" "Library calls"
 .ie \n(.g \{\
 .ds `` \(lq
 .ds '' \(rq
@@ -64,12 +64,12 @@ add a \fIcurses\fP character to a window and advance the cursor
 \fB#include <curses.h>
 .PP
 \fBint addch(const chtype \fIch\fP);
-\fBint waddch(WINDOW *\fIwin\fP, const chtype \fIch\fP);
+\fBint waddch(WINDOW * \fIwin\fP, const chtype \fIch\fP);
 \fBint mvaddch(int \fIy\fP, int \fIx\fP, const chtype \fIch\fP);
-\fBint mvwaddch(WINDOW *\fIwin\fP, int \fIy\fP, int \fIx\fP, const chtype \fIch\fP);
+\fBint mvwaddch(WINDOW * \fIwin\fP, int \fIy\fP, int \fIx\fP, const chtype \fIch\fP);
 .PP
 \fBint echochar(const chtype \fIch\fP);
-\fBint wechochar(WINDOW *\fIwin\fP, const chtype \fIch\fP);
+\fBint wechochar(WINDOW * \fIwin\fP, const chtype \fIch\fP);
 .PP
 \fI/* (integer) constants */\fP
 /*\fI .\|.\|. */ \fBACS_BLOCK;\fR
@@ -124,21 +124,31 @@ Construct a
 character
 from a
 .I char
-by assignment.
+by assignment or typecast.
 Subsection \*(``Video Attributes\*('' of \fB\%attron\fP(3X) describes
 how to manipulate its attributes and color pair.
 (A color pair selection is not honored unless initialized;
 see \fB\%start_color\fP(3X).)
 .PP
-If advancement occurs at the right margin,
-.bP
-the cursor automatically wraps to the beginning of the next line,
-then,
-.bP
-if it was at the bottom of the scrolling region,
-and if \fB\%scrollok\fP(3X) is enabled for
-.IR win ,
-the scrolling region scrolls up one line.
+The object or expression
+.I ch
+may contain attributes and/or a color pair identifier.
+(A
+.I \%chtype
+can be copied from place to place using \fB\%winch\fP(3X) and
+.BR \%waddch .)
+.I curses
+defines constants to aid the manipulation of character attributes;
+see \fB\%curs_attr\fP(3X).
+A
+.I ch
+whose character component is a space,
+and whose only attribute is
+.BR \%A_NORMAL ,
+is a
+.IR "blank character" ","
+and therefore combines with the window's background character;
+see \fB\%curs_bkgd\fP(3X).
 .PP
 If
 .I ch
@@ -163,6 +173,7 @@ then advances as if from the right margin.
 Tab advances the cursor to the next tab stop
 (possibly on the next line);
 these are placed at every eighth column by default.
+.IP
 Alter the tab interval with the
 .B \%TABSIZE
 extension;
@@ -171,30 +182,59 @@ see \fB\%curs_variables\fP(3X).
 If
 .I ch
 is any other nonprintable character,
-it is drawn in printable form using the same convention as
+.I curses
+draws it in printable form using the same convention as
 \fB\%unctrl\fP(3X).
 Calling \fB\%winch\fP(3X) on the location of a nonprintable character
 does not return the character itself,
 but its \fB\%unctrl\fP(3X) representation.
 .PP
-The object or expression
-.I ch
-may contain attributes and/or a color pair identifier.
-(A
-.I \%chtype
-can be copied from place to place using \fB\%winch\fP(3X) and
-.BR \%waddch .)
-See \fB\%curs_attr\fP(3X) for values of predefined constants that can be
-usefully \*(``or\*(''ed with characters.
-A
-.I ch
-whose character component is a space,
-and whose only attribute is
-.BR \%A_NORMAL ,
-is a
-.IR "blank character" ","
-and therefore combines with the background character;
-see \fB\%curs_bkgd\fP(3X).
+Adding printable characters with \fB\%waddch\fP
+causes it to wrap at the right margin of the window:
+.bP
+If the cursor is not at the bottom of the scrolling region
+and advancement occurs at the right margin,
+the cursor automatically wraps to the beginning of the next line.
+.bP
+If the cursor is at the bottom of the scrolling region
+when advancement occurs at the right margin,
+and \fB\%scrollok\fP(3X) is enabled for
+.IR win ,
+the scrolling region scrolls up one line
+and the cursor wraps as above.
+Otherwise,
+advancement and scrolling do not occur,
+and
+.B \%waddch
+returns
+.BR ERR "."
+.PP
+A window's margins may coincide with the screen boundaries.
+This may be a problem when
+.I \%ncurses
+updates the screen to match the curses window.
+When their right and bottom margins coincide,
+.I \%ncurses
+uses different strategies to handle the variations of scrolling and wrapping
+at the lower-right corner
+by depending on the terminal capabilities:
+.bP
+If the terminal does not automatically wrap as characters
+are added at the right margin
+(i.e., auto right margins),
+.I \%ncurses
+writes the character directly.
+.bP
+If the terminal has auto right margins,
+but also has capabilities for turning auto margins off and on,
+.I \%ncurses
+turns the auto margin feature off temporarily
+when writing to the lower-right corner.
+.bP
+If the terminal has an insertion mode which can be turned off and on,
+.I \%ncurses
+writes the character just before the lower-right corner,
+and then inserts a character to push the update into the corner.
 .SS wechochar
 .B \%echochar
 and
@@ -224,13 +264,15 @@ to write line-drawing and other symbols to the screen.
 .I \%ncurses
 terms these
 .I "forms-drawing characters."
-The ACS default listed below is used if the
+.I curses
+uses the ACS default listed below if the terminal type lacks the
 .B \%acs_chars
 .RB \%( acsc )
-.I \%term\%info
-capability does not define a terminal-specific replacement for it,
-or if the terminal and locale configuration requires Unicode to access
-these characters but the library is unable to use Unicode.
+capability;
+that capability does not define a replacement for the character;
+or if the terminal type and locale configuration
+require Unicode to access these characters,
+but the library is unable to use Unicode.
 The \*(``acsc char\*('' column corresponds to how the characters are
 specified in the
 .B \%acs_chars
@@ -292,12 +334,7 @@ on failure.
 .PP
 In
 .IR \%ncurses ,
-.B \%waddch
-and
-.B \%wechochar
-return
-.B ERR
-if
+these functions fail if
 .bP
 the
 .I curses
@@ -313,7 +350,7 @@ wrapping to a new line is impossible because \fB\%scrollok\fP(3X) has
 not been called on
 .I win
 (or
-.BR stdscr ","
+.BR \%stdscr ","
 as applicable)
 when a write to its bottom right location is attempted,
 or
@@ -346,14 +383,14 @@ and
 may be implemented as macros.
 .SH EXTENSIONS
 The symbols
-.RI \%( ACS_S3 ","
+.IR \%ACS_S3 ","
 .IR \%ACS_S7 ","
 .IR \%ACS_LEQUAL ","
 .IR \%ACS_GEQUAL ","
 .IR \%ACS_PI ","
 .IR \%ACS_NEQUAL ","
 and
-.IR \%ACS_STERLING ")"
+.I \%ACS_STERLING
 were not documented in any publicly released System\ V
 .\" And did not exist yet as late as SVr4.
 .\" https://github.com/ryanwoodsmall/oldsysv/blob/master/\
@@ -363,13 +400,75 @@ However,
 many publicly available
 .I \%term\%info
 entries include
-.I \%acs_chars
+.B \%acs_chars
 .RB \%( acsc )
 capabilities in which their key characters
 .RB ( pryz{|} )
 are embedded,
-and a second-hand list of their character descriptions has come to
-light.
+and a second-hand list of their character descriptions has come to light,
+which identifies them as VT100 special characters.
+.PP
+The DEC Special Character and Line Drawing Set (VT100) is indexed by
+an ASCII character in the range 96 (`) to 126 (~).
+That index character is part of the definition for the curses
+.B \%ACS_
+symbols.
+The VT100 special characters can be categorized in three groups:
+.bP
+useful graphic symbols with a standard
+.B \%ACS_
+symbol,
+(e.g., the line-drawing symbols),
+.bP
+possibly useful characters (these non-standard symbols),
+.bP
+representations of control characters (e.g., newline and vertical tabulation).
+.PP
+A few
+.B \%ACS_
+symbols do not fit into DEC's VT100 scheme.
+The AT&T Teletype 5410v1 arrow symbols and
+.B \%ACS_BLOCK
+use indices outside the range 96 to 126.
+Two of the Teletype symbols use indices in that range,
+with different meaning versus the VT100:
+.bP
+.B \%ACS_BOARD
+corresponds to the VT100 symbol for newline
+.bP
+.B \%ACS_LANTERN
+corresponds to the VT100 symbol for vertical tabulation
+.PP
+AT&T defined
+.B \%ACS_
+names for the most useful graphic symbols,
+as well as for its own.
+Its header file commented:
+.PP
+.EX
+.nf
+.\" Fill at 65 columns in your editor.
+/*
+ * Standard alternate character set.  The current ACS world is
+ * evolving, so we support only a widely available subset: the
+ * line drawing characters from the VT100, plus a few from the
+ * Teletype 5410v1.  Eventually there may be support of more
+ * sophisticated ACS line drawing, such as that in the Teletype
+ * 5410, the HP line drawing set, and the like.  There may be
+ * support for some non line oriented characters as well.
+ *
+ * Line drawing ACS names are of the form ACS_trbl, where t is
+ * the top, r is the right, b is the bottom, and l is the left.
+ * t, r, b, and l might be B (blank), S (single), D (double), or
+ * T (thick).  The subset defined here only uses B and S.
+ */
+.fi
+.EE
+.PP
+Although these less-useful graphic symbols were not given names,
+they were used in
+.I \%terminfo
+entries.
 The
 .I \%ncurses
 developers invented ACS-prefixed names for them.
@@ -460,7 +559,8 @@ constants depend on
 .bP
 the
 .I \%ncurses
-ABI\(emfor example,
+ABI \(em
+for example,
 wide-character versus non-wide-character configurations
 (the former is capable of displaying Unicode while the latter is not),
 and
@@ -484,7 +584,7 @@ but X/Open Curses leaves the width of a non-wide character code
 unspecified.
 The standard further does not specify the internal structure of a
 .IR chtype ","
-though the use of bit operations to combine the character code with
+though the use of bitwise operators to combine the character code with
 attributes and a color pair identifier into a
 .I \%chtype
 for passage to
@@ -518,9 +618,9 @@ When a character is
 .I \%ncurses
 displays the character and advances the cursor.
 If the calling application interrupts the succession of bytes in
-a multibyte character sequence by changing the current location\(emfor
-example,
-with \fB\%wmove\fP(3X)\(em\c
+a multibyte character sequence by changing the current location \(em
+for example,
+with \fB\%wmove\fP(3X) \(em
 .I \%ncurses
 discards the incomplete character.
 .PP

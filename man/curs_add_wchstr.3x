@@ -27,8 +27,8 @@
 .\" authorization.                                                           *
 .\"***************************************************************************
 .\"
-.\" $Id: curs_add_wchstr.3x,v 1.55 2025/02/01 22:57:57 tom Exp $
-.TH curs_add_wchstr 3X 2025-02-01 "ncurses @NCURSES_MAJOR@.@NCURSES_MINOR@" "Library calls"
+.\" $Id: curs_add_wchstr.3x,v 1.61 2025/10/21 00:06:34 tom Exp $
+.TH curs_add_wchstr 3X 2025-10-20 "ncurses @NCURSES_MAJOR@.@NCURSES_MINOR@" "Library calls"
 .ie \n(.g \{\
 .ds `` \(lq
 .ds '' \(rq
@@ -61,14 +61,11 @@ add a \fIcurses\fR complex character string to a window
 \fBint add_wchstr(const cchar_t * \fIwchstr\fP);
 \fBint wadd_wchstr(WINDOW *  \fIwin\fP, const cchar_t * \fIwchstr\fP);
 \fBint mvadd_wchstr(int \fIy\fP, int \fIx\fP, const cchar_t * \fIwchstr\fP);
-\fBint mvwadd_wchstr(WINDOW * \fIwin\fP, int \fIy\fP, int \fIx\fP,
-      const cchar_t * \fIwchstr\fP);
+\fBint mvwadd_wchstr(WINDOW * \fIwin\fP, int \fIy\fP, int \fIx\fP, const cchar_t * \fIwchstr\fP);
 .PP
 \fBint add_wchnstr(const cchar_t * \fIwchstr\fP, int \fIn\fP);
-\fBint wadd_wchnstr(WINDOW *  \fIwin\fP, const cchar_t * \fIwchstr\fP,
-      int \fIn\fP);
-\fBint mvadd_wchnstr(int \fIy\fP, int \fIx\fP, const cchar_t * \fIwchstr\fP,
-      int \fIn\fP);
+\fBint wadd_wchnstr(WINDOW *  \fIwin\fP, const cchar_t * \fIwchstr\fP, int \fIn\fP);
+\fBint mvadd_wchnstr(int \fIy\fP, int \fIx\fP, const cchar_t * \fIwchstr\fP, int \fIn\fP);
 \fBint mvwadd_wchnstr(WINDOW * \fIwin\fP, int \fIy\fP, int \fIx\fP,
       const cchar_t * \fIwchstr\fP, int \fIn\fP);
 .fi
@@ -106,6 +103,7 @@ or line feed characters specially;
 do not represent unprintable characters with \fB\%wunctrl\fP(3X);
 .bP
 do not update the cursor position to follow the last character written;
+and
 .bP
 truncate the string at the window's right margin,
 rather than wrapping it to the next line and potentially scrolling.
@@ -118,18 +116,21 @@ on failure.
 .PP
 In
 .IR \%ncurses ","
-they return
-.B ERR
-if
+these functions fail if
 .bP
-.I win
-is
-.I NULL
-or
+the
+.I curses
+screen has not been initialized,
 .bP
 .I wchstr
-is
-.IR NULL "."
+is a null pointer,
+or
+.bP
+(for functions taking a
+.I \%WINDOW
+pointer argument)
+.I win
+is a null pointer.
 .PP
 Functions prefixed with \*(``mv\*('' first perform cursor movement and
 fail if the position

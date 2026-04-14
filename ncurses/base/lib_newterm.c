@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright 2018-2022,2024 Thomas E. Dickey                                *
+ * Copyright 2018-2024,2025 Thomas E. Dickey                                *
  * Copyright 1998-2016,2017 Free Software Foundation, Inc.                  *
  *                                                                          *
  * Permission is hereby granted, free of charge, to any person obtaining a  *
@@ -49,9 +49,9 @@
 
 #include <tic.h>
 
-MODULE_ID("$Id: lib_newterm.c,v 1.107 2024/12/07 17:41:36 tom Exp $")
+MODULE_ID("$Id: lib_newterm.c,v 1.110 2025/12/27 12:28:45 tom Exp $")
 
-#ifdef USE_TERM_DRIVER
+#if USE_TERM_DRIVER
 #define NumLabels      InfoOf(SP_PARM).numlabels
 #else
 #define NumLabels      num_labels
@@ -88,7 +88,7 @@ _nc_initscr(NCURSES_SP_DCL0)
 	buf.c_oflag &= (unsigned) ~(ONLCR);
 #elif HAVE_SGTTY_H
 	buf.sg_flags &= ~(ECHO | CRMOD);
-#elif defined(EXP_WIN32_DRIVER)
+#elif USE_NAMED_PIPES
 	buf.dwFlagIn = CONMODE_IN_DEFAULT;
 	buf.dwFlagOut = CONMODE_OUT_DEFAULT | VT_FLAG_OUT;
 	if (WINCONSOLE.isTermInfoConsole) {
@@ -190,7 +190,7 @@ NCURSES_SP_NAME(newterm) (NCURSES_SP_DCLx
        (void *) ifp));
 
 #if NCURSES_SP_FUNCS
-    assert(SP_PARM != 0);
+    assert(SP_PARM != NULL);
     if (SP_PARM == NULL)
 	returnSP(SP_PARM);
 #endif
@@ -201,7 +201,7 @@ NCURSES_SP_NAME(newterm) (NCURSES_SP_DCLx
     current = CURRENT_SCREEN;
     its_term = (current ? current->_term : NULL);
 
-#if defined(EXP_WIN32_DRIVER)
+#if USE_NAMED_PIPES
     _setmode(fileno(_ifp), _O_BINARY);
     _setmode(fileno(_ofp), _O_BINARY);
 #endif
@@ -215,8 +215,8 @@ NCURSES_SP_NAME(newterm) (NCURSES_SP_DCLx
 	bool filter_mode;
 
 	_nc_set_screen(NULL);
-#ifdef USE_TERM_DRIVER
-	assert(new_term != 0);
+#if USE_TERM_DRIVER
+	assert(new_term != NULL);
 #endif
 
 #if NCURSES_SP_FUNCS
@@ -246,14 +246,14 @@ NCURSES_SP_NAME(newterm) (NCURSES_SP_DCLx
 	    int value;
 	    int cols;
 
-#ifdef USE_TERM_DRIVER
+#if USE_TERM_DRIVER
 	    TERMINAL_CONTROL_BLOCK *TCB;
 #elif !NCURSES_SP_FUNCS
 	    _nc_set_screen(CURRENT_SCREEN);
 #endif
-	    assert(SP_PARM != 0);
+	    assert(SP_PARM != NULL);
 	    cols = *(ptrCols(SP_PARM));
-#ifdef USE_TERM_DRIVER
+#if USE_TERM_DRIVER
 	    _nc_set_screen(SP_PARM);
 	    TCB = (TERMINAL_CONTROL_BLOCK *) new_term;
 	    TCB->csp = SP_PARM;
@@ -271,7 +271,7 @@ NCURSES_SP_NAME(newterm) (NCURSES_SP_DCLx
 	    if (current)
 		current->_term = its_term;
 
-#ifdef USE_TERM_DRIVER
+#if USE_TERM_DRIVER
 	    SP_PARM->_term = new_term;
 #else
 	    new_term = SP_PARM->_term;
@@ -301,7 +301,7 @@ NCURSES_SP_NAME(newterm) (NCURSES_SP_DCLx
 	    SP_PARM->_use_meta = FALSE;
 #endif
 	    SP_PARM->_endwin = ewInitial;
-#ifndef USE_TERM_DRIVER
+#if !USE_TERM_DRIVER
 	    /*
 	     * Check whether we can optimize scrolling under dumb terminals in
 	     * case we do not have any of these capabilities, scrolling
@@ -321,7 +321,7 @@ NCURSES_SP_NAME(newterm) (NCURSES_SP_DCLx
 	    SP_PARM->_keytry = NULL;
 
 	    /* compute movement costs so we can do better move optimization */
-#ifdef USE_TERM_DRIVER
+#if USE_TERM_DRIVER
 	    TCBOf(SP_PARM)->drv->td_scinit(SP_PARM);
 #else /* ! USE_TERM_DRIVER */
 	    /*

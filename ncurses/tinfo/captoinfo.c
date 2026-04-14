@@ -98,7 +98,7 @@
 #include <ctype.h>
 #include <tic.h>
 
-MODULE_ID("$Id: captoinfo.c,v 1.107 2025/02/15 15:31:16 tom Exp $")
+MODULE_ID("$Id: captoinfo.c,v 1.110 2025/12/31 11:46:29 tom Exp $")
 
 #if 0
 #define DEBUG_THIS(p) DEBUG(9, p)
@@ -549,7 +549,7 @@ bcd_expression(const char *str)
 	    char buffer[80];
 	    int tst;
 	    _nc_SPRINTF(buffer, _nc_SLIMIT(sizeof(buffer)) fmt, ch1, ch2);
-	    tst = strlen(buffer) - 1;
+	    tst = (int) strlen(buffer) - 1;
 	    assert(len == tst);
 	}
 #endif
@@ -657,7 +657,7 @@ _nc_infotocap(const char *cap GCC_UNUSED, const char *str, int const parameteriz
 	 *str &&
 	 ((trimmed == NULL) || (str < trimmed)); str++) {
 	int c1, c2;
-	char *cp = NULL;
+	const char *cp = NULL;
 
 	if (str[0] == '^') {
 	    if (str[1] == '\0' || (str + 1) == trimmed) {
@@ -980,7 +980,7 @@ _nc_infotocap(const char *cap GCC_UNUSED, const char *str, int const parameteriz
 	 * 'str' always points to the end of what was scanned in this step,
 	 * but that may not be the end of the string.
 	 */
-	assert(str != 0);
+	assert(str != NULL);
 	if (str == NULL || *str == '\0')
 	    break;
 

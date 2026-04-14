@@ -28,8 +28,8 @@
 .\" authorization.                                                           *
 .\"***************************************************************************
 .\"
-.\" $Id: curs_add_wch.3x,v 1.102 2025/02/01 23:54:03 tom Exp $
-.TH curs_add_wch 3X 2025-02-01 "ncurses @NCURSES_MAJOR@.@NCURSES_MINOR@" "Library calls"
+.\" $Id: curs_add_wch.3x,v 1.125 2025/11/12 01:06:36 tom Exp $
+.TH curs_add_wch 3X 2025-11-11 "ncurses @NCURSES_MAJOR@.@NCURSES_MINOR@" "Library calls"
 .ie \n(.g \{\
 .ds `` \(lq
 .ds '' \(rq
@@ -57,14 +57,13 @@ add a \fIcurses\fR complex character to a window, possibly advancing the cursor
 .nf
 \fB#include <curses.h>
 .PP
-\fBint add_wch(const cchar_t *\fIwch\fP);
-\fBint wadd_wch(WINDOW *\fIwin\fP, const cchar_t *\fIwch\fP);
-\fBint mvadd_wch(int \fIy\fP, int \fIx\fP, const cchar_t *\fIwch\fP);
-\fBint mvwadd_wch(WINDOW *\fIwin\fP, int \fIy\fP, int \fIx\fP,
-      const cchar_t *\fIwch\fP);
+\fBint add_wch(const cchar_t * \fIwch\fP);
+\fBint wadd_wch(WINDOW * \fIwin\fP, const cchar_t * \fIwch\fP);
+\fBint mvadd_wch(int \fIy\fP, int \fIx\fP, const cchar_t * \fIwch\fP);
+\fBint mvwadd_wch(WINDOW * \fIwin\fP, int \fIy\fP, int \fIx\fP, const cchar_t * \fIwch\fP);
 .PP
-\fBint echo_wchar(const cchar_t *\fIwch\fP);
-\fBint wecho_wchar(WINDOW *\fIwin\fP, const cchar_t *\fIwch\fP);
+\fBint echo_wchar(const cchar_t * \fIwch\fP);
+\fBint wecho_wchar(WINDOW * \fIwin\fP, const cchar_t *\fIwch\fP);
 .PP
 \fI/* (integer) constants */\fP
 /*\fI .\|.\|. */ \fBWACS_BLOCK;\fR
@@ -144,6 +143,21 @@ complex character
 from a
 .I wchar_t
 with \fB\%setcchar\fP(3X).
+A
+.I \%cchar_t
+can be copied from place to place using \fB\%win_wch\fP(3X) and
+.BR \%wadd_wch "."
+.I curses
+defines constants to aid the manipulation of character attributes;
+see \fB\%curs_attr\fP(3X).
+A complex character whose only character component is a wide space,
+and whose only attribute is
+.BR \%WA_NORMAL ,
+is a
+.IR "blank character" ","
+and therefore combines with the window's background character;
+see \fB\%curs_bkgrnd\fP(3X).
+.PP
 Much behavior depends on whether the wide characters in
 .I wch
 are spacing or non-spacing;
@@ -177,16 +191,6 @@ are not written at the new cursor position but combine with the active
 complex character until another spacing character is written to the
 window or the cursor is moved.
 .PP
-If advancement occurs at the right margin,
-.bP
-the cursor automatically wraps to the beginning of the next line,
-then,
-.bP
-if it was at the bottom of the scrolling region,
-and if \fB\%scrollok\fP(3X) is enabled for
-.IR win ,
-the scrolling region scrolls up one line.
-.PP
 If
 .I wch
 is a
@@ -210,6 +214,7 @@ then advances as if from the right margin.
 Tab advances the cursor to the next tab stop
 (possibly on the next line);
 these are placed at every eighth column by default.
+.IP
 Alter the tab interval with the
 .B \%TABSIZE
 extension;
@@ -218,25 +223,59 @@ see \fB\%curs_variables\fP(3X).
 If
 .I wch
 is any other nonprintable character,
-it is drawn in printable form using the same convention as
+.I curses
+draws it in printable form using the same convention as
 \fB\%wunctrl\fP(3X).
 Calling \fB\%win_wch\fP(3X) on the location of a nonprintable character
-does not return the character itself,
+does not retrieve the character itself,
 but its \fB\%wunctrl\fP(3X) representation.
 .PP
-A
-.I \%cchar_t
-can be copied from place to place using \fB\%win_wch\fP(3X) and
-.BR \%wadd_wch "."
-See \fB\%curs_attr\fP(3X) for values of predefined constants that can be
-usefully \*(``or\*(''ed with characters.
-A complex character whose only character component is a wide space,
-and whose only attribute is
-.BR \%WA_NORMAL ,
-is a
-.IR "blank character" ","
-and therefore combines with the background character;
-see \fB\%curs_bkgrnd\fP(3X).
+Adding spacing characters with \fB\%wadd_wch\fP
+causes it to wrap at the right margin of the window:
+.bP
+If the cursor is not at the bottom of the scrolling region
+and advancement occurs at the right margin,
+the cursor automatically wraps to the beginning of the next line.
+.bP
+If the cursor is at the bottom of the scrolling region
+when advancement occurs at the right margin,
+and \fB\%scrollok\fP(3X) is enabled for
+.IR win ,
+the scrolling region scrolls up one line
+and the cursor wraps as above.
+Otherwise,
+advancement and scrolling do not occur,
+and
+.B \%wadd_wch
+returns
+.BR ERR "."
+.PP
+A window's margins may coincide with the screen boundaries.
+This may be a problem when
+.I \%ncurses
+updates the screen to match the curses window.
+When their right and bottom margins coincide,
+.I \%ncurses
+uses different strategies to handle the variations of scrolling and wrapping
+at the lower-right corner
+by depending on the terminal capabilities:
+.bP
+If the terminal does not automatically wrap as characters
+are added at the right margin
+(i.e., auto right margins),
+.I \%ncurses
+writes the character directly.
+.bP
+If the terminal has auto right margins,
+but also has capabilities for turning auto margins off and on,
+.I \%ncurses
+turns the auto margin feature off temporarily
+when writing to the lower-right corner.
+.bP
+If the terminal has an insertion mode which can be turned off and on,
+.I \%ncurses
+writes the character just before the lower-right corner,
+and then inserts a character to push the update into the corner.
 .SS wecho_wchar
 .B \%echo_wchar
 and
@@ -265,13 +304,15 @@ to write line-drawing and other symbols to the screen.
 .I \%ncurses
 terms these
 .I "forms-drawing characters."
-The ACS default listed below is used if the
+.I curses
+uses the ACS default listed below if the terminal type lacks the
 .B \%acs_chars
 .RB \%( acsc )
-.I \%term\%info
-capability does not define a terminal-specific replacement for it,
-or if the terminal and locale configuration requires Unicode to access
-these characters but the library is unable to use Unicode.
+capability;
+that capability does not define a replacement for the character;
+or if the terminal type and locale configuration
+require Unicode to access these characters,
+but the library is unable to use Unicode.
 The \*(``acsc char\*('' column corresponds to how the characters are
 specified in the
 .B \%acs_chars
@@ -287,7 +328,7 @@ of the DEC VT100 terminal.
 .TS
 Lb Lb Lb Lb Lb
 Lb Lb Lb Lb Lb
-Lb L  L  L  Lx.
+Lb L  L  L  Lw(15n)x.
 \&	Unicode	ACS	acsc	\&
 Symbol	Default	Default	char	Glyph Name
 _
@@ -365,7 +406,7 @@ and \*(``Q\*(''):
 .TS
 Lb Lb Lb Lb Lb
 Lb Lb Lb Lb Lb
-Lb L  L  L  Lx.
+Lb L  L  L  Lw(14n)x.
 \&	Unicode	ASCII	acsc	\&
 ACS Name	Default	Default	Char	Glyph Name
 _
@@ -412,7 +453,7 @@ plus \*(``R\*('' and \*(``Y\*(''):
 .TS
 Lb Lb Lb Lb Lb
 Lb Lb Lb Lb Lb
-Lb L  L  L  Lx.
+Lb L  L  L  Lw(14n)x.
 \&	Unicode	ASCII	acsc	\&
 ACS Name	Default	Default	Char	Glyph Name
 _
@@ -470,12 +511,7 @@ on failure.
 .PP
 In
 .IR \%ncurses ,
-.B \%wadd_wch
-and
-.B \%wecho_wchar
-return
-.B ERR
-if
+these functions fail if
 .bP
 the
 .I curses
@@ -491,7 +527,7 @@ wrapping to a new line is impossible because \fB\%scrollok\fP(3X) has
 not been called on
 .I win
 (or
-.BR stdscr ","
+.BR \%stdscr ","
 as applicable)
 when writing to its bottom right location is attempted,
 or
@@ -512,20 +548,20 @@ and
 may be implemented as macros.
 .SH EXTENSIONS
 The symbols
-.RI \%( WACS_S3 ","
+.IR \%WACS_S3 ","
 .IR \%WACS_S7 ","
 .IR \%WACS_LEQUAL ","
 .IR \%WACS_GEQUAL ","
 .IR \%WACS_PI ","
 .IR \%WACS_NEQUAL ","
 and
-.IR \%WACS_STERLING ")"
+.I \%WACS_STERLING
 are not standard.
 However,
 many publicly available
 .I \%term\%info
 entries include
-.I \%acs_chars
+.B \%acs_chars
 .RB \%( acsc )
 capabilities in which their key characters
 .RB ( pryz{|} )

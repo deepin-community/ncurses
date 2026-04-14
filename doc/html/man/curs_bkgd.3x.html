@@ -27,23 +27,21 @@
   * sale, use or other dealings in this Software without prior written       *
   * authorization.                                                           *
   ****************************************************************************
-  * @Id: curs_bkgd.3x,v 1.74 2025/01/19 00:49:39 tom Exp @
+  * @Id: curs_bkgd.3x,v 1.76 2025/08/23 22:39:20 tom Exp @
 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN">
 <HTML>
 <HEAD>
 <meta http-equiv="Content-Type" content="text/html; charset=us-ascii">
 <meta name="generator" content="Manpage converted by man2html - see https://invisible-island.net/scripts/readme.html#others_scripts">
-<TITLE>curs_bkgd 3x 2025-01-18 ncurses 6.5 Library calls</TITLE>
+<TITLE>curs_bkgd 3x 2025-08-23 ncurses 6.6 Library calls</TITLE>
 <link rel="author" href="mailto:bug-ncurses@gnu.org">
 
 </HEAD>
 <BODY>
-<H1 class="no-header">curs_bkgd 3x 2025-01-18 ncurses 6.5 Library calls</H1>
+<H1 class="no-header">curs_bkgd 3x 2025-08-23 ncurses 6.6 Library calls</H1>
 <PRE>
 <STRONG><A HREF="curs_bkgd.3x.html">curs_bkgd(3x)</A></STRONG>                    Library calls                   <STRONG><A HREF="curs_bkgd.3x.html">curs_bkgd(3x)</A></STRONG>
-
-
 
 
 </PRE><H2><a name="h2-NAME">NAME</a></H2><PRE>
@@ -65,10 +63,11 @@
 
 </PRE><H2><a name="h2-DESCRIPTION">DESCRIPTION</a></H2><PRE>
        Every <EM>curses</EM>  window  has  a  <EM>background</EM>  <EM>character</EM>  property:  in  the
-       library's  non-wide  configuration,  it  is a <EM>curses</EM> character (<EM>chtype</EM>)
-       that combines a set of attributes (and, if colors are enabled, a  color
-       pair  identifier)  with  a  character  code.  When erasing (parts of) a
-       window, <EM>curses</EM> replaces the erased cells with the background character.
+       library's  non-wide-character  configuration,  it is a <EM>curses</EM> character
+       (<EM>chtype</EM>) that combines a set of attributes (and, if colors are enabled,
+       a color pair identifier) with a character code.   When  erasing  (parts
+       of)  a  window,  <EM>curses</EM>  replaces  the erased cells with the background
+       character.
 
        <EM>curses</EM> also uses the background character when writing characters to  a
        populated window.
@@ -83,7 +82,7 @@
 
        The  background character's set of attributes becomes a property of the
        character cell and move with it through any scrolling and insert/delete
-       line/character  operations.   To  the  extent  possible on the terminal
+       line/character operations.  To the  extent  possible  on  the  terminal
        type, <EM>curses</EM> displays the attributes of the background character as the
        graphic rendition of a character cell on the display.
 
@@ -99,7 +98,7 @@
        <STRONG>o</STRONG>   Wherever the former background character appears, it changes to the
            new background character.
 
-       <EM>ncurses</EM>  updates  the rendition of each character cell by comparing the
+       <EM>ncurses</EM> updates the rendition of each character cell by  comparing  the
        character, non-color attributes, and color pair selection.  The library
        applies  the following procedure to each cell in the window, whether or
        not it is blank.
@@ -109,20 +108,20 @@
            new background character to the cell.
 
        <STRONG>o</STRONG>   <EM>ncurses</EM> then checks whether the cell uses color; that is, its color
-           pair  value  is nonzero.  If not, it simply replaces the attributes
-           and color pair in the cell  with  those  from  the  new  background
+           pair value is nonzero.  If not, it simply replaces  the  attributes
+           and  color  pair  in  the  cell  with those from the new background
            character.
 
-       <STRONG>o</STRONG>   If  the  cell  uses color, and its background color matches that of
-           the current window background, <EM>ncurses</EM> removes attributes that  may
-           have  come  from the current background and adds those from the new
-           background.  It finishes by setting the cell's  background  to  use
+       <STRONG>o</STRONG>   If the cell uses color, and its background color  matches  that  of
+           the  current window background, <EM>ncurses</EM> removes attributes that may
+           have come from the current background and adds those from  the  new
+           background.   It  finishes  by setting the cell's background to use
            the new window background color.
 
-       <STRONG>o</STRONG>   If  the  cell  uses  color, and its background color does not match
-           that of the current window background,  <EM>ncurses</EM>  updates  only  the
-           non-color  attributes, first removing those that may have come from
-           the current background, and then adding  attributes  from  the  new
+       <STRONG>o</STRONG>   If the cell uses color, and its background  color  does  not  match
+           that  of  the  current  window background, <EM>ncurses</EM> updates only the
+           non-color attributes, first removing those that may have come  from
+           the  current  background,  and  then adding attributes from the new
            background.
 
        If the new background's character is non-spacing (for example, if it is
@@ -142,7 +141,7 @@
 
 
 </PRE><H3><a name="h3-getbkgd">getbkgd</a></H3><PRE>
-       <STRONG>getbkgd</STRONG> returns the given window's  background  character,  attributes,
+       <STRONG>getbkgd</STRONG>  returns  the  given window's background character, attributes,
        and color pair as a <EM>chtype</EM>.
 
 
@@ -185,8 +184,8 @@
        Neither X/Open  Curses  nor  the  SVr4  manual  pages  detail  how  the
        rendition  of  characters  in  the  window  updates  when <EM>bkgd</EM> or <EM>wbkgd</EM>
        changes the background character.  <EM>ncurses</EM>, like SVr4 <EM>curses</EM>, does  not
-       (in  its  non-wide  configuration)  store  the  background  and  window
-       attribute contributions to each character cell separately.
+       (in  its  non-wide-character  configuration)  store  the background and
+       window attribute contributions to each character cell separately.
 
 
 </PRE><H2><a name="h2-HISTORY">HISTORY</a></H2><PRE>
@@ -199,9 +198,7 @@
 
        <STRONG><A HREF="ncurses.3x.html">curses(3x)</A></STRONG>, <STRONG><A HREF="curs_addch.3x.html">curs_addch(3x)</A></STRONG>, <STRONG><A HREF="curs_attr.3x.html">curs_attr(3x)</A></STRONG>
 
-
-
-ncurses 6.5                       2025-01-18                     <STRONG><A HREF="curs_bkgd.3x.html">curs_bkgd(3x)</A></STRONG>
+ncurses 6.6                       2025-08-23                     <STRONG><A HREF="curs_bkgd.3x.html">curs_bkgd(3x)</A></STRONG>
 </PRE>
 <div class="nav">
 <ul>
