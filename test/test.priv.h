@@ -30,7 +30,7 @@
 /****************************************************************************
  *  Author: Thomas E. Dickey                    1996-on                     *
  ****************************************************************************/
-/* $Id: test.priv.h,v 1.221 2025/01/18 15:07:25 tom Exp $ */
+/* $Id: test.priv.h,v 1.229 2025/12/06 21:21:06 tom Exp $ */
 
 #ifndef __TEST_PRIV_H
 #define __TEST_PRIV_H 1
@@ -183,6 +183,30 @@
 #define HAVE_MATH_H 0
 #endif
 
+#ifndef HAVE_MBLEN
+#define HAVE_MBLEN 0
+#endif
+
+#ifndef HAVE_MBRLEN
+#define HAVE_MBRLEN 0
+#endif
+
+#ifndef HAVE_MBRTOWC
+#define HAVE_MBRTOWC 0
+#endif
+
+#ifndef HAVE_MBSRTOWCS
+#define HAVE_MBSRTOWCS 0
+#endif
+
+#ifndef HAVE_MBSTOWCS
+#define HAVE_MBSTOWCS 0
+#endif
+
+#ifndef HAVE_MBTOWC
+#define HAVE_MBTOWC 0
+#endif
+
 #ifndef HAVE_MENU_H
 #define HAVE_MENU_H 0
 #endif
@@ -275,6 +299,10 @@
 #define HAVE_SYS_SELECT_H 0
 #endif
 
+#ifndef HAVE_SYS_TIME_SELECT
+#define HAVE_SYS_TIME_SELECT 0
+#endif
+
 #ifndef HAVE_TERMATTRS
 #define HAVE_TERMATTRS 0
 #endif
@@ -361,6 +389,18 @@
 
 #ifndef HAVE_VID_PUTS
 #define HAVE_VID_PUTS 0
+#endif
+
+#ifndef HAVE_WCSRTOMBS
+#define HAVE_WCSRTOMBS 0
+#endif
+
+#ifndef HAVE_WCSTOMBS
+#define HAVE_WCSTOMBS 0
+#endif
+
+#ifndef HAVE_WCWIDTH
+#define HAVE_WCWIDTH 0
 #endif
 
 #ifndef HAVE_WINSDELLN
@@ -743,16 +783,28 @@ extern int optind;
 #define HELP_KEY_2	KEY_F(1)
 
 /* our "standard" options for getopt, needed for help2man */
+#define OPTS_COMMAND	'c'
+#define OPTS_LOGGING	'l'
 #define OPTS_USAGE	'h'
 #define OPTS_VERSION	'V'
-#define OPTS_COMMON	"hV"
+#define OPTS_COMMON	"c:l:hV"
 #define USAGE_COMMON	\
  "Common options:"\
 ," -h       show this message"\
 ," -V       show version of curses"
 
+/* reserve -c/-l for command/logging */
+#define CASE_COMMON \
+	case OPTS_COMMAND: \
+	case OPTS_LOGGING: \
+	    usage(ch == OPTS_USAGE); \
+	    ExitProgram(EXIT_FAILURE); \
+	case OPTS_VERSION: \
+	    show_version(argv); \
+	    ExitProgram(EXIT_SUCCESS)
+
 #if HAVE_CURSES_VERSION
-#define format_version(buffer, size) strcpy(buffer, curses_version())
+#define format_version(buffer, size) _nc_STRCPY(buffer, curses_version(), size)
 #elif defined(NCURSES_VERSION_MAJOR) && defined(NCURSES_VERSION_MINOR) && defined(NCURSES_VERSION_PATCH)
 #define format_version(buffer, size) \
 	_nc_SPRINTF(buffer, _nc_SLIMIT(size) "ncurses %d.%d.%d", \
@@ -760,7 +812,7 @@ extern int optind;
 		    NCURSES_VERSION_MINOR, \
 		    NCURSES_VERSION_PATCH)
 #else
-#define format_version(buffer, size) strcpy(buffer, "ncurses-examples")
+#define format_version(buffer, size) _nc_STRCPY(buffer, "ncurses-examples", size)
 #endif
 
 #define VERSION_COMMON() \
@@ -1072,11 +1124,8 @@ extern int TABSIZE;
 #include <sys/time.h>		/* for struct timeval */
 #undef sleep
 #define sleep(n) Sleep((n) * 1000)
-#define SIGHUP  1
-#define SIGKILL 9
-#define getlogin() "username"
 
-#elif defined(EXP_WIN32_DRIVER)
+#else /* !PDCURSES */
 
 #if defined(HAVE_NCURSESW_NCURSES_H)
 #include <ncursesw/nc_win32.h>
@@ -1086,23 +1135,23 @@ extern int TABSIZE;
 #include <nc_win32.h>
 #endif
 
-#else
+#endif /* PDCURSES */
 
-#if defined(HAVE_NCURSESW_NCURSES_H)
-#include <ncursesw/nc_mingw.h>
-#elif defined(HAVE_NCURSES_NCURSES_H)
-#include <ncurses/nc_mingw.h>
-#else
-#include <nc_mingw.h>
+#define getlogin() "username"
+
+#ifndef SIGHUP
+#define SIGHUP  1
 #endif
 
+#ifndef SIGKILL
+#define SIGKILL 9
 #endif
 
 /* conflicts in test/firstlast.c */
 #undef large
 #undef small
 
-#endif
+#endif /* WIN32... */
 
 #ifdef NEED_TIME_H
 #if TIME_WITH_SYS_TIME

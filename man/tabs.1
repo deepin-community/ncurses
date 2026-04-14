@@ -27,8 +27,8 @@
 .\" authorization.                                                           *
 .\"***************************************************************************
 .\"
-.\" $Id: tabs.1,v 1.70 2025/02/15 14:55:00 tom Exp $
-.TH @TABS@ 1 2025-02-15 "ncurses @NCURSES_MAJOR@.@NCURSES_MINOR@" "User commands"
+.\" $Id: tabs.1,v 1.74 2025/08/16 19:11:47 tom Exp $
+.TH @TABS@ 1 2025-08-16 "ncurses @NCURSES_MAJOR@.@NCURSES_MINOR@" "User commands"
 .ie \n(.g \{\
 .ds `` \(lq
 .ds '' \(rq
@@ -128,8 +128,10 @@ They are separated by a comma or a blank, for example,
 .PP
 .RS 4
 .EX
+.nf
 @TABS@ 1,6,11,16,21
 @TABS@ 1 6 11 16 21
+.fi
 .EE
 .RE
 .PP
@@ -144,8 +146,8 @@ e.g.,
 .RE
 .PP
 which is equivalent to the 1,6,11,16,21 example.
-.SS "Predefined Tab Stops"
-POSIX defines several predefined lists of tab stops.
+.SS "Standard Tab Stops"
+POSIX defines several lists of tab stops.
 .TP 5
 .B \-a
 Assembler, IBM S/370, first format

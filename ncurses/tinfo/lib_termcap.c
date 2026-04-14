@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright 2018-2023,2024 Thomas E. Dickey                                *
+ * Copyright 2018-2024,2025 Thomas E. Dickey                                *
  * Copyright 1998-2016,2017 Free Software Foundation, Inc.                  *
  *                                                                          *
  * Permission is hereby granted, free of charge, to any person obtaining a  *
@@ -49,7 +49,7 @@
 #define CUR SP_TERMTYPE
 #endif
 
-MODULE_ID("$Id: lib_termcap.c,v 1.92 2024/12/15 00:12:19 tom Exp $")
+MODULE_ID("$Id: lib_termcap.c,v 1.96 2025/12/27 12:33:34 tom Exp $")
 
 NCURSES_EXPORT_VAR(char *) UP = NULL;
 NCURSES_EXPORT_VAR(char *) BC = NULL;
@@ -94,7 +94,7 @@ NCURSES_SP_NAME(tgetent) (NCURSES_SP_DCLx char *bufp, const char *name)
     int rc = ERR;
     int n;
     bool found_cache = FALSE;
-#ifdef USE_TERM_DRIVER
+#if USE_TERM_DRIVER
     TERMINAL *termp = NULL;
 #endif
 
@@ -103,7 +103,7 @@ NCURSES_SP_NAME(tgetent) (NCURSES_SP_DCLx char *bufp, const char *name)
 
     TINFO_SETUP_TERM(&termp, name, STDOUT_FILENO, &rc, TRUE);
 
-#ifdef USE_TERM_DRIVER
+#if USE_TERM_DRIVER
     if (termp == NULL ||
 	!((TERMINAL_CONTROL_BLOCK *) termp)->drv->isTerminfo)
 	returnCode(rc);
@@ -192,7 +192,7 @@ NCURSES_SP_NAME(tgetent) (NCURSES_SP_DCLx char *bufp, const char *name)
 	LAST_USE = TRUE;
 
 	SetNoPadding(SP_PARM);
-	(void) NCURSES_SP_NAME(baudrate) (NCURSES_SP_ARG);	/* sets ospeed as a side-effect */
+	(void) NCURSES_SP_NAME(baudrate) (NCURSES_SP_ARG);	/* sets ospeed as a side effect */
 
 /* LINT_PREPRO
 #if 0*/
@@ -292,6 +292,8 @@ NCURSES_SP_NAME(tgetnum) (NCURSES_SP_DCLx const char *id)
     int result = ABSENT_NUMERIC;
 
     T((T_CALLED("tgetnum(%p, %s)"), (void *) SP_PARM, id));
+    assert(result < 0);
+
     if (HasTInfoTerminal(SP_PARM) && ValidCap(id)) {
 	TERMTYPE2 *tp = &TerminalType(TerminalOf(SP_PARM));
 	struct name_table_entry const *entry_ptr;

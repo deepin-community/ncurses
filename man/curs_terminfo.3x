@@ -28,8 +28,8 @@
 .\" authorization.                                                           *
 .\"***************************************************************************
 .\"
-.\" $Id: curs_terminfo.3x,v 1.162 2025/02/15 15:24:18 tom Exp $
-.TH curs_terminfo 3X 2025-02-15 "ncurses @NCURSES_MAJOR@.@NCURSES_MINOR@" "Library calls"
+.\" $Id: curs_terminfo.3x,v 1.176 2025/11/12 01:06:36 tom Exp $
+.TH curs_terminfo 3X 2025-11-11 "ncurses @NCURSES_MAJOR@.@NCURSES_MINOR@" "Library calls"
 .ie \n(.g \{\
 .ds `` \(lq
 .ds '' \(rq
@@ -85,8 +85,7 @@
 \fBint setupterm(const char * \fIterm\fP, int \fIfiledes\fP, int * \fIerrret\fP);
 \fBTERMINAL * set_curterm(TERMINAL * \fInterm\fP);
 \fBint del_curterm(TERMINAL * \fIoterm\fP);
-\fBint restartterm(const char * \fIterm\fP, int \fIfiledes\fP,
-      int * \fIerrret\fP);
+\fBint restartterm(const char * \fIterm\fP, int \fIfiledes\fP, int * \fIerrret\fP);
 .PP
 \fBchar * tparm(const char * \fIstr\fP, \fR.\|.\|.\fP);
 	\fI/* or */
@@ -97,8 +96,7 @@
 .PP
 \fBint vidputs(chtype \fIattrs\fP, int (* \fIputc\fP)(int));
 \fBint vidattr(chtype \fIattrs\fP);
-\fBint vid_puts(attr_t \fIattrs\fP, short \fIpair\fP, void * \fIopts\fP,
-      int (* \fIputc\fP)(int));
+\fBint vid_puts(attr_t \fIattrs\fP, short \fIpair\fP, void * \fIopts\fP, int (* \fIputc\fP)(int));
 \fBint vid_attr(attr_t \fIattrs\fP, short \fIpair\fP, void * \fIopts\fP);
 .PP
 \fBint tigetflag(const char * \fIcap-code\fP);
@@ -108,8 +106,7 @@
 \fBchar * tiparm(const char * \fIstr\fP, \fR.\|.\|.\fP);
 .PP
 \fI/* extensions */
-\fBchar * tiparm_s(int \fIexpected\fP, int \fImask\fP,
-      const char * \fIstr\fP, .\|.\|.);
+\fBchar * tiparm_s(int \fIexpected\fP, int \fImask\fP, const char * \fIstr\fP, .\|.\|.);
 \fBint tiscan_s(int * \fIexpected\fP, int * \fImask\fP, const char * \fIstr\fP);
 .PP
 \fI/* deprecated */
@@ -354,9 +351,8 @@ It returns the old value of
 .BR \%cur_term "."
 .PP
 .B \%del_curterm
-frees the memory pointed to by
-.IR \%oterm ","
-making it available for further use.
+releases the memory pointed to by
+.IR \%oterm "."
 If
 .I \%oterm
 is
@@ -395,11 +391,11 @@ then restores that state.
 .I str
 with parameters
 .IR pi "."
-A pointer is returned to the result of
+It returns a pointer to a character string representing
 .I str
-with the parameters applied.
-Application developers should keep in mind these quirks of the
-interface:
+with the parameters applied to \*(``%\*('' expressions within.
+.\" XXX: Whose responsibility is it to free that string?
+Application developers should keep in mind some quirks of the interface.
 .bP
 Although \fB\%tparm\fP's actual parameters may be integers or strings,
 the prototype expects
@@ -418,33 +414,45 @@ it is interpreted by \fB\%tputs\fP.
 The capability string is null-terminated.
 Use \*(``\e200\*('' where an ASCII NUL is needed in the output.
 .PP
-\fB\%tiparm\fP is a newer form of \fB\%tparm\fP which uses
+\fB\%tiparm\fP is a newer form of \fB\%tparm\fP that uses
 .I \%stdarg.h
-rather than a fixed-parameter list.
+rather than a fixed-length parameter list.
 Its numeric parameters are
 .IR int s
 rather than
 .IR long "s."
 .PP
-Both \fB\%tparm\fP and \fB\%tiparm\fP assume that the application passes
-parameters consistent with the terminal description.
-Two extensions are provided as alternatives to deal with untrusted data.
+.B \%tparm
+and
+.B \%tiparm
+assume that the application
+passes parameters consistent with the terminal description.
+.I \%ncurses
+provides two extensions as alternatives to deal with untrusted data.
 .bP
-\fB\%tiparm_s\fP is an extension which is a safer formatting function
-than \fB\%tparm\fR or \fB\%tiparm\fR,
+The
+.B \%tiparm_s
+extension is a safer formatting function than
+.B \%tparm
+or
+.BR \%tiparm ","
 because it allows the developer to tell the
 .I curses
 library how many parameters to expect in the parameter list,
 and which may be string parameters.
 .IP
-The \fImask\fP parameter has one bit set for each of the parameters
+The
+.I mask
+parameter has one bit set for each of the parameters
 (up to 9)
 passed as
 .I char
 pointers rather than numbers.
 .bP
-The extension \fB\%tiscan_s\fP allows the application to inspect a
-formatting capability to see what the
+The extension
+.B \%tiscan_s
+allows the application
+to inspect a formatting capability to see what the
 .I curses
 library would assume.
 .\" ********************************************************************
@@ -453,22 +461,29 @@ String capabilities can contain
 .IR padding ","
 a time delay
 (accommodating performance limitations of hardware terminals)
-expressed as \fB$<\fIn\fB>\fR,
-where \fIn\fP is a nonnegative integral count of milliseconds.
-If \fIn\fP exceeds 30,000
+expressed as
+.BI $< n >\c
+,
+where
+.I n
+is a nonnegative integral count of milliseconds.
+If
+.I n
+exceeds 30,000
 (thirty seconds),
-it is capped at that value.
+.I \%ncurses
+caps it at that value.
 .PP
-\fB\%tputs\fP interprets time-delay information in the string
+.B \%tputs
+interprets time delays in the string
 .I str
-and outputs it,
-executing the delays:
+and acts upon them.
 .bP
 The
 .I str
 parameter must be a
 .I \%term\%info
-string variable or the return value of
+string capability or the return value of
 .B \%tparm
 or
 .BR \%tiparm "."
@@ -484,9 +499,9 @@ is a
 .IR \%putchar -like
 function to which the characters are passed,
 one at a time.
-.IP
-If \fB\%tputs\fP processes a time-delay,
-it uses the \fB\%delay_output\fP(3X) function,
+.PP
+.B \%tputs
+processes each time delay with the \fB\%delay_output\fP(3X) function,
 routing any resulting padding characters through this function.
 .PP
 \fB\%putp\fR calls
@@ -573,7 +588,7 @@ passed to them.
 The
 .I cap-code
 for each capability is given in the table column of that name
-in the \*(``Predefined Capabilities\*('' section of \fB\%terminfo\fP(5).
+in the \*(``Capabilities\*('' section of \fB\%terminfo\fP(5).
 .PP
 These functions return special values to denote errors.
 .PP
@@ -623,9 +638,9 @@ and
 .bP
 the long \fI\%term\%info\fP names (\*(``fnames\*('')
 .PP
-for each of the predefined
+for each standard
 .I \%term\%info
-variables:
+capability name.
 .PP
 .RS
 .nf
@@ -688,7 +703,7 @@ upon success.
 In
 .IR \%ncurses ","
 .TP 5
-.B del_curtem
+.B del_curterm
 fails if its terminal parameter is null.
 .TP 5
 .B putp
@@ -882,9 +897,11 @@ standardized in the late 1980s.
 X/Open Curses uses
 .I \%const
 less effectively than a later design might,
-sometimes applying it needlessly to values that are already constant,
-and in most cases overlooking parameters that normally would benefit
-from
+sometimes applying it needlessly to function parameters
+that are passed by value
+(and therefore copied),
+and in most cases overlooking parameters
+that normally would benefit from
 .IR \%const "."
 Passing
 .IR \%const -qualified
@@ -980,12 +997,14 @@ correctly.
 .SS "Special \fITERM\fP treatment"
 If
 .I \%ncurses
-is configured to use the terminal driver,
-.\" XXX: as opposed to the Unix terminal driver, termio(s)?
+is configured to use a terminal driver
+that does not employ the POSIX
+.I \%termios
+API,
 as with the MinGW port,
 .bP
 .I \%setupterm
-interprets a missing/empty
+interprets a missing or empty
 .I TERM
 variable as the special value \*(``unknown\*(''.
 .IP
@@ -1034,6 +1053,14 @@ from
 .IR \%tputs "."
 It instead returns the length of the string,
 and does no error checking.
+.PP
+Very old versions of AIX
+.\" Can we be more specific?  Like, AIX 4.3.3 and earlier? --GBR
+.I curses
+required inclusion of
+.I \%curses.h
+before
+.IR \%term.h .
 .\" ********************************************************************
 .SH HISTORY
 SVr2 (1984) introduced the
@@ -1042,8 +1069,8 @@ feature.
 Its programming manual mentioned the following low-level functions.
 .PP
 .TS
-lB lB
-lI lx.
+Lb Lb
+Li Lw(47n)x.
 Function	Description
 _
 fixterm	restore terminal to \*(``in \fIcurses\fP\*('' state
@@ -1072,8 +1099,8 @@ compatibility
 (commenting that they \*(``may go away at a later date\*('').
 .PP
 .TS
-lB lB
-lI lx.
+Lb Lb
+Li Lw(48n)x.
 Function	Description
 _
 tgetent	look up \fItermcap\fP entry for given \fIname\fP
@@ -1106,8 +1133,8 @@ and
 .PP
 .ne 4v
 .TS
-lB lB
-lI lx.
+Lb Lb
+LI Lx.
 Function	Description
 _
 tigetflag	get Boolean entry for given \fIid\fP
@@ -1123,8 +1150,8 @@ interface,
 documenting them as obsolete.
 .PP
 .TS
-lB lB
-lI lIx.
+Lb Lb
+Li Lix.
 Function	Replaced by
 _
 crmode	cbreak

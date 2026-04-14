@@ -57,9 +57,9 @@
 #undef CUR
 #define CUR SP_TERMTYPE
 
-MODULE_ID("$Id: lib_set_term.c,v 1.196 2025/02/15 12:55:53 tom Exp $")
+MODULE_ID("$Id: lib_set_term.c,v 1.199 2025/12/27 12:28:45 tom Exp $")
 
-#ifdef USE_TERM_DRIVER
+#if USE_TERM_DRIVER
 #define MaxColors      InfoOf(sp).maxcolors
 #define NumLabels      InfoOf(sp).numlabels
 #else
@@ -318,13 +318,13 @@ NCURSES_SP_NAME(_nc_setupscreen) (
 				     bool filtered,
 				     int slk_format)
 {
-#ifndef USE_TERM_DRIVER
+#if !USE_TERM_DRIVER
     static const TTY null_TTY;	/* all zeros iff uninitialized */
 #endif
     char *env;
     int bottom_stolen = 0;
     SCREEN *sp;
-#ifndef USE_TERM_DRIVER
+#if !USE_TERM_DRIVER
     bool support_cookies = USE_XMC_SUPPORT;
 #endif
 
@@ -386,7 +386,7 @@ NCURSES_SP_NAME(_nc_setupscreen) (
      */
     _nc_set_screen(sp);
     sp->_term = cur_term;
-#ifdef USE_TERM_DRIVER
+#if USE_TERM_DRIVER
     TCBOf(sp)->csp = sp;
     _nc_get_screensize(sp, sp->_term, &slines, &scolumns);
 #else
@@ -408,7 +408,7 @@ NCURSES_SP_NAME(_nc_setupscreen) (
     if (filtered) {
 	slines = 1;
 	SET_LINES(slines);
-#ifdef USE_TERM_DRIVER
+#if USE_TERM_DRIVER
 	CallDriver(sp, td_setfilter);
 #else
 	/* *INDENT-EQLS* */
@@ -427,7 +427,7 @@ NCURSES_SP_NAME(_nc_setupscreen) (
 #endif
 	T(("filter screensize %dx%d", slines, scolumns));
     }
-#if defined(EXP_WIN32_DRIVER)
+#if USE_NAMED_PIPES
     T(("setting output mode to binary"));
     fflush(output);
     _setmode(fileno(output), _O_BINARY);
@@ -439,7 +439,7 @@ NCURSES_SP_NAME(_nc_setupscreen) (
     fflush(output);
     sp->_ofd = output ? fileno(output) : -1;
     sp->_ofp = output;
-#if defined(EXP_WIN32_DRIVER)
+#if USE_NAMED_PIPES
     if (output)
 	_setmode(fileno(output), _O_BINARY);
 #endif
@@ -457,7 +457,7 @@ NCURSES_SP_NAME(_nc_setupscreen) (
 
     /*
      * Set our assumption of the terminal's default foreground and background
-     * colors.  The curs_color man-page states that we can assume that the
+     * colors.  The curs_color man page states that we can assume that the
      * background is black.  The origin of this assumption appears to be
      * terminals that displayed colored text, but no colored backgrounds, e.g.,
      * the first colored terminals around 1980.  More recent ones with better
@@ -553,7 +553,7 @@ NCURSES_SP_NAME(_nc_setupscreen) (
     if (NCURSES_SP_NAME(has_colors) (NCURSES_SP_ARG)) {
 	sp->_ok_attributes |= A_COLOR;
     }
-#ifdef USE_TERM_DRIVER
+#if USE_TERM_DRIVER
     _nc_cookie_init(sp);
 #else
 #if USE_XMC_SUPPORT
@@ -690,7 +690,7 @@ NCURSES_SP_NAME(_nc_setupscreen) (
      * Get the current tty-modes. setupterm() may already have done this,
      * unless we use the term-driver.
      */
-#ifndef USE_TERM_DRIVER
+#if !USE_TERM_DRIVER
     if (cur_term != NULL &&
 	!memcmp(&cur_term->Ottyb, &null_TTY, sizeof(TTY)))
 #endif

@@ -1,6 +1,6 @@
 '\" t
 .\"***************************************************************************
-.\" Copyright 2018-2023,2024 Thomas E. Dickey                                *
+.\" Copyright 2018-2024,2025 Thomas E. Dickey                                *
 .\" Copyright 1998-2016,2017 Free Software Foundation, Inc.                  *
 .\"                                                                          *
 .\" Permission is hereby granted, free of charge, to any person obtaining a  *
@@ -28,8 +28,8 @@
 .\" authorization.                                                           *
 .\"***************************************************************************
 .\"
-.\" $Id: term.5,v 1.80 2024/06/15 20:23:33 tom Exp $
-.TH term 5 2024-06-15 "ncurses @NCURSES_MAJOR@.@NCURSES_MINOR@" "File formats"
+.\" $Id: term.5,v 1.85 2025/08/16 19:11:47 tom Exp $
+.TH term 5 2025-08-16 "ncurses @NCURSES_MAJOR@.@NCURSES_MINOR@" "File formats"
 .ie \n(.g \{\
 .ds `` \(lq
 .ds '' \(rq
@@ -273,8 +273,9 @@ binary format.
 With some minor variations of the offsets
 (see PORTABILITY),
 the same binary format is used in all modern Unix systems.
-Each system uses a predefined set of Boolean,
-number or string capabilities.
+Each system uses a standard set of Boolean,
+numeric,
+or string capabilities.
 .PP
 The
 .I \%ncurses
@@ -288,7 +289,7 @@ implementations stop reading the
 data when they reach the end of the size given in the header.
 .I \%ncurses
 checks the size,
-and if it exceeds that due to the predefined data,
+and if it exceeds that specified in the header,
 continues to parse according to its own scheme.
 .PP
 First,
@@ -506,12 +507,14 @@ description of the Lear-Siegler ADM-3,
 a popular though rather stupid early terminal.
 .PP
 .EX
+.nf
 adm3a|lsi adm3a,
         am,
         cols#80, lines#24,
         bel=\*^G, clear=\e032$<1>, cr=\*^M, cub1=\*^H, cud1=\*^J,
         cuf1=\*^L, cup=\eE=%p1%{32}%+%c%p2%{32}%+%c, cuu1=\*^K,
         home=\*^\*^, ind=\*^J,
+.fi
 .EE
 .PP
 A hexadecimal dump of its compiled terminal description

@@ -1,3 +1,46 @@
+ncurses (6.6+20251231-1) unstable; urgency=medium
+
+  * New upstream patchlevel.
+  * Update symbols files and bump shlibs.
+  * Upgrade Standards-Version to 4.7.3, no changes needed.
+
+ -- Sven Joachim <svenjoac@gmx.de>  Sat, 03 Jan 2026 08:53:58 +0100
+
+ncurses (6.5+20251123-1) unstable; urgency=medium
+
+  * New upstream patchlevel.
+    - Revert change using NCURSES_SBOOL in tic.h which interfered with
+      sign-extension in tigetflag (Closes: #1121191).
+
+ -- Sven Joachim <svenjoac@gmx.de>  Mon, 24 Nov 2025 20:50:02 +0100
+
+ncurses (6.5+20251122-1) unstable; urgency=medium
+
+  * New upstream patchlevel.
+    - Correct expression for TINFO_LIB variable in misc/ncurses-config.in
+      (Closes: #1121208).
+  * Add a smoke autopkgtest which builds a simple program, catching the
+    above problem.
+
+ -- Sven Joachim <svenjoac@gmx.de>  Sun, 23 Nov 2025 14:55:47 +0100
+
+ncurses (6.5+20251115-2) unstable; urgency=medium
+
+  * Upload to unstable.
+
+ -- Sven Joachim <svenjoac@gmx.de>  Thu, 20 Nov 2025 20:52:35 +0100
+
+ncurses (6.5+20251115-1) experimental; urgency=low
+
+  * New upstream patchlevel.
+    - Add a buffer-limit check in postprocess_termcap (report/testcase
+      by Yifan Zhang (CVE-2025-6141, Closes: #1107937)).
+    - Formatting improvements for terminfo.5 (Closes: #1096164).
+  * Refresh patch 02-debian-backspace.diff.
+  * Drop the redundant Rules-Requires-Root field from debian/control.
+
+ -- Sven Joachim <svenjoac@gmx.de>  Mon, 17 Nov 2025 18:46:28 +0100
+
 ncurses (6.5+20250216-2) unstable; urgency=medium
 
   * Update upstream signing key.

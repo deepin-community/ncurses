@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright 2020-2023,2024 Thomas E. Dickey                                *
+ * Copyright 2020-2024,2025 Thomas E. Dickey                                *
  * Copyright 1998-2009,2010 Free Software Foundation, Inc.                  *
  *                                                                          *
  * Permission is hereby granted, free of charge, to any person obtaining a  *
@@ -49,7 +49,7 @@
 
 #include <curses.priv.h>
 
-MODULE_ID("$Id: lib_kernel.c,v 1.37 2024/12/07 20:05:08 tom Exp $")
+MODULE_ID("$Id: lib_kernel.c,v 1.40 2025/12/23 09:09:50 tom Exp $")
 
 #ifdef TERMIOS
 static int
@@ -94,7 +94,7 @@ NCURSES_SP_NAME(erasechar) (NCURSES_SP_DCL0)
 	result = termp->Ottyb.c_cc[VERASE];
 	if (result == _nc_vdisable())
 	    result = ERR;
-#elif defined(EXP_WIN32_DRIVER)
+#elif defined(USE_WIN32CON_DRIVER)
 	result = ERR;
 #else
 	result = termp->Ottyb.sg_erase;
@@ -131,7 +131,7 @@ NCURSES_SP_NAME(killchar) (NCURSES_SP_DCL0)
 	result = termp->Ottyb.c_cc[VKILL];
 	if (result == _nc_vdisable())
 	    result = ERR;
-#elif defined(EXP_WIN32_DRIVER)
+#elif defined(USE_WIN32CON_DRIVER)
 	result = ERR;
 #else
 	result = termp->Ottyb.sg_kill;
@@ -151,12 +151,12 @@ killchar(void)
 static void
 flush_input(int fd)
 {
-#ifdef TERMIOS
+#if defined(TERMIOS)
     tcflush(fd, TCIFLUSH);
 #else /* !TERMIOS */
     errno = 0;
     do {
-#if defined(EXP_WIN32_DRIVER)
+#if defined(USE_WIN32CON_DRIVER)
 	_nc_console_flush(_nc_console_fd2handle(fd));
 #else
 	ioctl(fd, TIOCFLUSH, 0);

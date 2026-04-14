@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright 2018-2022,2024 Thomas E. Dickey                                *
+ * Copyright 2018-2024,2025 Thomas E. Dickey                                *
  * Copyright 1998-2017,2018 Free Software Foundation, Inc.                  *
  *                                                                          *
  * Permission is hereby granted, free of charge, to any person obtaining a  *
@@ -44,7 +44,7 @@
 #define CUR SP_TERMTYPE
 #endif
 
-MODULE_ID("$Id: lib_traceatr.c,v 1.98 2024/12/07 21:12:53 tom Exp $")
+MODULE_ID("$Id: lib_traceatr.c,v 1.101 2025/11/16 16:08:54 tom Exp $")
 
 #define COLOR_OF(c) ((c < 0) ? "default" : (c > 7 ? color_of(c) : colors[c].name))
 
@@ -363,7 +363,7 @@ _tracecchar_t2(int bufnum, const cchar_t *ch)
 								  UChar(ch->chars[PUTC_i])));
 			}
 			break;
-		    } else if (ch->chars[PUTC_i] > assume_unicode) {
+		    } else if ((int) ch->chars[PUTC_i] > assume_unicode) {
 			char temp[80];
 			_nc_SPRINTF(temp, _nc_SLIMIT(sizeof(temp))
 				    "{%d:\\u%04lx}",
@@ -371,7 +371,7 @@ _tracecchar_t2(int bufnum, const cchar_t *ch)
 				    (unsigned long) ch->chars[PUTC_i]);
 			(void) _nc_trace_bufcat(bufnum, temp);
 			attr &= ~A_CHARTEXT;	/* ignore WidecExt(ch) */
-		    } else {
+		    } else if (PUTC_n > 1 || !is8bits(ch->chars[PUTC_i])) {
 			for (n = 0; n < PUTC_n; n++) {
 			    if (n)
 				(void) _nc_trace_bufcat(bufnum, ", ");
@@ -379,6 +379,11 @@ _tracecchar_t2(int bufnum, const cchar_t *ch)
 						    _nc_tracechar(CURRENT_SCREEN,
 								  UChar(PUTC_buf[n])));
 			}
+		    } else {
+			char temp[2];
+			temp[0] = (char) ch->chars[PUTC_i];
+			temp[1] = 0;
+			(void) _nc_trace_bufcat(bufnum, temp);
 		    }
 		}
 		(void) _nc_trace_bufcat(bufnum, " }");

@@ -29,8 +29,8 @@
 .\"
 .\" Author: Thomas E. Dickey 1999-on
 .\"
-.\" $Id: curs_extend.3x,v 1.54 2025/01/19 00:49:39 tom Exp $
-.TH curs_extend 3X 2025-01-18 "ncurses @NCURSES_MAJOR@.@NCURSES_MINOR@" "Library calls"
+.\" $Id: curs_extend.3x,v 1.67 2025/11/12 00:46:51 tom Exp $
+.TH curs_extend 3X 2025-11-11 "ncurses @NCURSES_MAJOR@.@NCURSES_MINOR@" "Library calls"
 .ie \n(.g \{\
 .ds `` \(lq
 .ds '' \(rq
@@ -44,7 +44,7 @@
 .SH NAME
 \fB\%curses_version\fP,
 \fB\%use_extended_names\fP \-
-miscellaneous \fIcurses\fR extensions
+miscellaneous \fIncurses\fR extensions
 .SH SYNOPSIS
 .nf
 \fB#include <curses.h>
@@ -77,8 +77,8 @@ since the essential decision
 is made through use of \fB\%@TIC@\fP(1)'s
 .B \-x
 option to include such extensions in terminal type descriptions.
-.B \%use_extended_names
-can prevent
+.B \%use_extended_names(FALSE)
+prevents
 .I \%ncurses
 from recognizing these capabilities
 to ensure compatibility with other implementations of
@@ -112,6 +112,13 @@ Applications employing
 extensions should condition their use on the visibility of the
 .B \%NCURSES_VERSION
 preprocessor macro.
+.PP
+NetBSD 9 added a
+.I \%curses_version
+function
+that intentionally returns a string devoid of version information.
+.\" See https://mail-index.netbsd.org/tech-userlevel/2019/08/27/\
+.\" msg012068.html and follow-up messages.
 .SH AUTHORS
 Thomas Dickey
 .SH SEE ALSO
