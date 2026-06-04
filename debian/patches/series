@@ -2,3 +2,4 @@
 02-debian-backspace.diff
 03-debian-ncursesconfig-omit-L.diff
 CVE-2025-69720.patch
+CVE-2023-50495.patch

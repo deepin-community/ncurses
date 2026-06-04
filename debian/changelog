@@ -1,3 +1,14 @@
+ncurses (6.5+20250216-2deepin2) unstable; urgency=medium
+
+  * Backport CVE-2023-50495 patch
+    - Fix stack buffer overflow in _nc_parse_entry() when processing
+      terminfo entries with a very long description field
+    - Ensure _nc_save_str() return value is checked before dereference
+    - The fix is already included in the upstream 6.5+20250216 source,
+      add explicit patch file for CVE tracking
+
+ -- deepin-ci-robot <packages@deepin.org>  Thu, 04 Jun 2026 16:00:00 +0800
+
 ncurses (6.5+20250216-2deepin1) unstable; urgency=medium
 
   * Backport CVE-2025-69720 patch
