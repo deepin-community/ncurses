@@ -1,12 +1,16 @@
-ncurses (6.5+20250216-2deepin1.1) UNRELEASED; urgency=medium
+ncurses (6.5+20250216-2deepin1.2) unstable; urgency=medium
 
+  [ hudeng-go ]
   * Non-maintainer upload.
   * Backport CVE-2025-6141 patch
     - Fix stack buffer overflow in postprocess_termcap()
     - Add bounds check when copying strings in tinfo/parse_entry.c
     - Upstream commit: 291c07deec39875f3098ecfc62eece44438649ba
 
- -- hudeng-go <hudeng@uniontech.com>  Wed, 03 Jun 2026 14:07:49 +0800
+  [ tunaichao ]
+  * Rebuild with LTO enabled (dpkg vendor feature optimize/lto).
+
+ -- tunaichao <tunaichao@uniontech.com>  Thu, 10 Sep 2026 19:36:17 +0800
 
 ncurses (6.5+20250216-2deepin1) unstable; urgency=medium
 
